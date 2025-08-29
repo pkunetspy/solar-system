@@ -10,6 +10,11 @@ class SolarSystem {
         this.asteroids = [];
         this.sun = null;
         
+        // 时间模式控制
+        this.timeMode = 'static'; // 'static' 或 'animation'
+        this.simulationStartTime = Date.now();
+        this.animationTimeScale = 7 * 24 * 60 * 60 * 1000; // 一秒真实时间 = 一周模拟时间
+        
         // 真实的天体数据（相对比例，以地球为1）
         this.celestialData = {
             sun: {
@@ -129,6 +134,7 @@ class SolarSystem {
         this.createAsteroidBelt();
         this.setupControls();
         this.setupClock();
+        this.setupTimeControls();
         this.animate();
         
         // 延迟创建标签，确保所有3D对象都已创建
@@ -147,8 +153,9 @@ class SolarSystem {
         // 创建渲染器
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // 关闭阴影系统以避免不必要的黑色投影
+        // this.renderer.shadowMap.enabled = true;
+        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
         document.getElementById('canvas-container').appendChild(this.renderer.domElement);
         
@@ -184,9 +191,10 @@ class SolarSystem {
         // 太阳光（点光源）
         const sunLight = new THREE.PointLight(0xffffff, 2, 0, 2);
         sunLight.position.set(0, 0, 0);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
+        // 关闭阴影投射
+        // sunLight.castShadow = true;
+        // sunLight.shadow.mapSize.width = 2048;
+        // sunLight.shadow.mapSize.height = 2048;
         this.scene.add(sunLight);
         
         // 环境光（微弱）
@@ -224,8 +232,9 @@ class SolarSystem {
             const material = new THREE.MeshLambertMaterial({ color: data.color });
             
             const planet = new THREE.Mesh(geometry, material);
-            planet.castShadow = true;
-            planet.receiveShadow = true;
+            // 关闭行星的阴影投射和接收
+            // planet.castShadow = true;
+            // planet.receiveShadow = true;
             planet.userData = data;
             
             // 设置初始位置
@@ -314,12 +323,14 @@ class SolarSystem {
             
             const asteroid = new THREE.Mesh(geometry, material);
             asteroid.position.set(x, y, z);
-            asteroid.castShadow = true;
-            asteroid.receiveShadow = true;
+            // 关闭小行星的阴影效果
+            // asteroid.castShadow = true;
+            // asteroid.receiveShadow = true;
             
             // 存储小行星的轨道信息
             asteroid.userData = {
                 angle: angle,
+                initialAngle: angle, // 保存初始角度用于运动模式
                 distance: distance,
                 heightVariation: heightVariation,
                 radiusVariation: radiusVariation,
@@ -346,17 +357,78 @@ class SolarSystem {
     }
     
     updateClock() {
-        const now = new Date();
-        const timeString = now.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
+        let displayTime;
+        
+        if (this.timeMode === 'static') {
+            // 静态模式：显示当前真实时间
+            displayTime = new Date();
+            const timeString = displayTime.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            document.getElementById('clock').textContent = timeString;
+        } else {
+            // 动画模式：只显示日期，不显示秒
+            displayTime = new Date(this.getSimulationTime());
+            const timeString = displayTime.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour12: false
+            });
+            document.getElementById('clock').textContent = timeString;
+        }
+    }
+    
+    setupTimeControls() {
+        const button = document.getElementById('time-mode-button');
+        const info = document.getElementById('time-info');
+        
+        button.addEventListener('click', () => {
+            this.toggleTimeMode();
         });
-        document.getElementById('clock').textContent = timeString;
+        
+        this.updateTimeControlsUI();
+    }
+    
+    toggleTimeMode() {
+        if (this.timeMode === 'static') {
+            this.timeMode = 'animation';
+            this.simulationStartTime = Date.now();
+        } else {
+            this.timeMode = 'static';
+        }
+        this.updateTimeControlsUI();
+    }
+    
+    updateTimeControlsUI() {
+        const button = document.getElementById('time-mode-button');
+        const info = document.getElementById('time-info');
+        
+        if (this.timeMode === 'static') {
+            button.textContent = '切换到运动模式';
+            button.className = '';
+            info.textContent = '当前：静态模式（实时时间）';
+        } else {
+            button.textContent = '切换到静态模式';
+            button.className = 'animation-mode';
+            info.textContent = '当前：运动模式（1秒 = 1周）';
+        }
+    }
+    
+    getSimulationTime() {
+        if (this.timeMode === 'static') {
+            return Date.now();
+        } else {
+            const realTimeElapsed = Date.now() - this.simulationStartTime;
+            const simulationTimeElapsed = realTimeElapsed * this.animationTimeScale / 1000;
+            return this.simulationStartTime + simulationTimeElapsed;
+        }
     }
     
     createLabels() {
@@ -459,7 +531,8 @@ class SolarSystem {
     animate() {
         requestAnimationFrame(() => this.animate());
         
-        const currentTime = Date.now();
+        // 使用模拟时间而不是真实时间
+        const currentTime = this.getSimulationTime();
         
         // 更新行星位置
         this.planets.forEach(planet => {
@@ -489,8 +562,15 @@ class SolarSystem {
         this.asteroids.forEach(asteroid => {
             const data = asteroid.userData;
             
-            // 计算新的角度位置（缓慢旋转）
-            data.angle += data.rotationSpeed;
+            if (this.timeMode === 'animation') {
+                // 运动模式：基于时间计算角度位置
+                const daysSinceEpoch = currentTime / (1000 * 60 * 60 * 24);
+                const orbitalPeriod = 4 * 365; // 小行星带大约4年公转周期
+                data.angle = (daysSinceEpoch / orbitalPeriod) * 2 * Math.PI + data.initialAngle;
+            } else {
+                // 静态模式：缓慢增量旋转
+                data.angle += data.rotationSpeed;
+            }
             
             // 重新计算位置
             const x = (data.distance + data.radiusVariation) * Math.cos(data.angle);
