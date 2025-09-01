@@ -14,6 +14,8 @@ class SolarSystem {
         this.timeMode = 'static'; // 'static' 或 'animation'
         this.simulationStartTime = Date.now();
         this.animationTimeScale = 7 * 24 * 60 * 60 * 1000; // 一秒真实时间 = 一周模拟时间
+        this.isPaused = false; // 暂停状态
+        this.pausedTime = 0; // 暂停时的累积时间
         
         // 真实的天体数据（相对比例，以地球为1）
         this.celestialData = {
@@ -116,7 +118,7 @@ class SolarSystem {
         this.scaleFactors = {
             distance: 10, // 距离缩放
             planetSize: 0.5, // 行星大小缩放
-            sunSize: 0.01 // 太阳大小调整为0.01
+            sunSize: 0.02 // 太阳大小调整为0.01
         };
         
         this.init();
@@ -135,6 +137,7 @@ class SolarSystem {
         this.setupControls();
         this.setupClock();
         this.setupTimeControls();
+        this.setupKeyboardControls(); // 添加键盘控制
         this.animate();
         
         // 延迟创建标签，确保所有3D对象都已创建
@@ -400,8 +403,13 @@ class SolarSystem {
         if (this.timeMode === 'static') {
             this.timeMode = 'animation';
             this.simulationStartTime = Date.now();
+            this.isPaused = false;
+            this.pausedTime = 0;
         } else {
             this.timeMode = 'static';
+            // 切换到静态模式时重置暂停状态
+            this.isPaused = false;
+            this.pausedTime = 0;
         }
         this.updateTimeControlsUI();
     }
@@ -425,10 +433,46 @@ class SolarSystem {
         if (this.timeMode === 'static') {
             return Date.now();
         } else {
-            const realTimeElapsed = Date.now() - this.simulationStartTime;
-            const simulationTimeElapsed = realTimeElapsed * this.animationTimeScale / 1000;
-            return this.simulationStartTime + simulationTimeElapsed;
+            if (this.isPaused) {
+                // 如果暂停，返回暂停时的时间
+                return this.simulationStartTime + this.pausedTime * this.animationTimeScale / 1000;
+            } else {
+                const realTimeElapsed = Date.now() - this.simulationStartTime;
+                const simulationTimeElapsed = realTimeElapsed * this.animationTimeScale / 1000;
+                return this.simulationStartTime + simulationTimeElapsed;
+            }
         }
+    }
+    
+    setupKeyboardControls() {
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                // 只在运动模式下响应空格键暂停功能
+                if (this.timeMode === 'animation') {
+                    event.preventDefault(); // 防止页面滚动
+                    this.togglePause();
+                } else {
+                    // 静态模式下也阻止空格键的默认行为（防止页面滚动）
+                    event.preventDefault();
+                }
+            }
+        });
+    }
+    
+    togglePause() {
+        if (this.timeMode !== 'animation') return;
+        
+        if (this.isPaused) {
+            // 继续：重置开始时间，考虑暂停期间的时间
+            this.simulationStartTime = Date.now() - this.pausedTime;
+            this.isPaused = false;
+        } else {
+            // 暂停：记录当前经过的时间
+            this.pausedTime = Date.now() - this.simulationStartTime;
+            this.isPaused = true;
+        }
+        
+        this.updateTimeControlsUI();
     }
     
     createLabels() {
