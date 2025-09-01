@@ -9,6 +9,7 @@ class SolarSystem {
         this.labels = [];
         this.asteroids = [];
         this.sun = null;
+        this.moon = null; // 月球对象
         
         // 时间模式控制
         this.timeMode = 'static'; // 'static' 或 'animation'
@@ -57,6 +58,17 @@ class SolarSystem {
                 rotationPeriod: 1,
                 inclination: 0,
                 eccentricity: 0.017
+            },
+            moon: {
+                name: '月球',
+                radius: 0.273,
+                color: 0xC0C0C0,
+                distance: 0.00257, // 距离地球的距离（AU）
+                orbitalPeriod: 27.3, // 地球日
+                rotationPeriod: 27.3, // 同步自转
+                inclination: 5.145,
+                eccentricity: 0.0549,
+                parentPlanet: 'earth' // 围绕地球运行
             },
             mars: {
                 name: '火星',
@@ -132,6 +144,7 @@ class SolarSystem {
         this.createLights();
         this.createSun();
         this.createPlanets();
+        this.createMoon(); // 创建月球
         this.createOrbits();
         this.createAsteroidBelt();
         this.setupControls();
@@ -249,6 +262,26 @@ class SolarSystem {
         });
     }
     
+    createMoon() {
+        const moonData = this.celestialData.moon;
+        
+        // 月球的半径
+        const radius = moonData.radius * this.scaleFactors.planetSize;
+        
+        const geometry = new THREE.SphereGeometry(radius, 16, 16);
+        const material = new THREE.MeshLambertMaterial({ color: moonData.color });
+        
+        this.moon = new THREE.Mesh(geometry, material);
+        this.moon.userData = moonData;
+        
+        // 初始位置设置在地球附近
+        const earthDistance = this.celestialData.earth.distance * this.scaleFactors.distance;
+        const moonDistance = moonData.distance * this.scaleFactors.distance * 30; // 放大月球轨道以便观察
+        this.moon.position.set(earthDistance + moonDistance, 0, 0);
+        
+        this.scene.add(this.moon);
+    }
+    
     createOrbits() {
         const planetNames = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
         
@@ -261,6 +294,10 @@ class SolarSystem {
             // 创建椭圆轨道路径
             this.createEllipticalOrbit(semiMajorAxis, eccentricity, inclination);
         });
+        
+        // 创建月球轨道（围绕地球）
+        // 月球轨道暂不显示，因为需要跟随地球运动
+        // this.createMoonOrbit();
     }
     
     createEllipticalOrbit(semiMajorAxis, eccentricity, inclination) {
@@ -292,6 +329,48 @@ class SolarSystem {
         const orbit = new THREE.Line(geometry, material);
         this.orbits.push(orbit);
         this.scene.add(orbit);
+    }
+    
+    createMoonOrbit() {
+        const moonData = this.celestialData.moon;
+        const earthData = this.celestialData.earth;
+        
+        // 地球的位置
+        const earthDistance = earthData.distance * this.scaleFactors.distance;
+        
+        // 月球轨道参数
+        const moonDistance = moonData.distance * this.scaleFactors.distance * 30; // 放大月球轨道以便观察
+        const eccentricity = moonData.eccentricity;
+        const inclination = (moonData.inclination || 0) * Math.PI / 180;
+        
+        const points = [];
+        const segments = 64;
+        
+        // 计算月球椭圆轨道上的点（相对于地球）
+        for (let i = 0; i <= segments; i++) {
+            const angle = (i / segments) * 2 * Math.PI;
+            
+            // 椭圆参数方程
+            const radius = moonDistance * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(angle));
+            const x = radius * Math.cos(angle) + earthDistance; // 相对于地球位置
+            const z = radius * Math.sin(angle);
+            const y = z * Math.sin(inclination);
+            const zFinal = z * Math.cos(inclination);
+            
+            points.push(new THREE.Vector3(x, y, zFinal));
+        }
+        
+        // 创建月球轨道线条
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({
+            color: 0xcccccc, // 月球轨道用浅灰色
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const moonOrbit = new THREE.Line(geometry, material);
+        this.orbits.push(moonOrbit);
+        this.scene.add(moonOrbit);
     }
     
     createAsteroidBelt() {
@@ -501,6 +580,20 @@ class SolarSystem {
                 object: planet
             });
         });
+        
+        // 创建月球标签
+        if (this.moon) {
+            const moonLabel = document.createElement('div');
+            moonLabel.className = 'planet-label';
+            moonLabel.textContent = this.celestialData.moon.name;
+            moonLabel.style.color = `#${this.celestialData.moon.color.toString(16)}`;
+            document.body.appendChild(moonLabel);
+            
+            this.labels.push({
+                element: moonLabel,
+                object: this.moon
+            });
+        }
     }
     
     calculatePlanetPosition(planet, time) {
@@ -544,6 +637,70 @@ class SolarSystem {
         planet.rotation.y = rotationAngle;
     }
     
+    calculateMoonPosition(moon, time) {
+        const moonData = moon.userData;
+        const earthData = this.celestialData.earth;
+        
+        // 首先计算地球的当前位置
+        const earthDistance = earthData.distance * this.scaleFactors.distance;
+        const earthEccentricity = earthData.eccentricity || 0;
+        const earthInclination = (earthData.inclination || 0) * Math.PI / 180;
+        
+        const daysSinceEpoch = time / (1000 * 60 * 60 * 24);
+        const earthMeanAnomaly = (daysSinceEpoch / earthData.orbitalPeriod) * 2 * Math.PI;
+        
+        // 计算地球的椭圆轨道位置
+        let earthEccentricAnomaly = earthMeanAnomaly;
+        for (let i = 0; i < 5; i++) {
+            earthEccentricAnomaly = earthMeanAnomaly + earthEccentricity * Math.sin(earthEccentricAnomaly);
+        }
+        
+        const earthTrueAnomaly = 2 * Math.atan2(
+            Math.sqrt(1 + earthEccentricity) * Math.sin(earthEccentricAnomaly / 2),
+            Math.sqrt(1 - earthEccentricity) * Math.cos(earthEccentricAnomaly / 2)
+        );
+        
+        const earthRadius = earthDistance * (1 - earthEccentricity * earthEccentricity) / (1 + earthEccentricity * Math.cos(earthTrueAnomaly));
+        const earthX = earthRadius * Math.cos(earthTrueAnomaly);
+        const earthZ = earthRadius * Math.sin(earthTrueAnomaly) * Math.cos(earthInclination);
+        const earthY = earthRadius * Math.sin(earthTrueAnomaly) * Math.sin(earthInclination);
+        
+        // 计算月球相对于地球的位置
+        const moonDistance = moonData.distance * this.scaleFactors.distance * 30; // 放大月球轨道
+        const moonEccentricity = moonData.eccentricity || 0;
+        const moonInclination = (moonData.inclination || 0) * Math.PI / 180;
+        
+        const moonMeanAnomaly = (daysSinceEpoch / moonData.orbitalPeriod) * 2 * Math.PI;
+        
+        let moonEccentricAnomaly = moonMeanAnomaly;
+        for (let i = 0; i < 5; i++) {
+            moonEccentricAnomaly = moonMeanAnomaly + moonEccentricity * Math.sin(moonEccentricAnomaly);
+        }
+        
+        const moonTrueAnomaly = 2 * Math.atan2(
+            Math.sqrt(1 + moonEccentricity) * Math.sin(moonEccentricAnomaly / 2),
+            Math.sqrt(1 - moonEccentricity) * Math.cos(moonEccentricAnomaly / 2)
+        );
+        
+        const moonRadius = moonDistance * (1 - moonEccentricity * moonEccentricity) / (1 + moonEccentricity * Math.cos(moonTrueAnomaly));
+        
+        // 月球在自己轨道上的相对位置
+        const moonRelativeX = moonRadius * Math.cos(moonTrueAnomaly);
+        const moonRelativeZ = moonRadius * Math.sin(moonTrueAnomaly) * Math.cos(moonInclination);
+        const moonRelativeY = moonRadius * Math.sin(moonTrueAnomaly) * Math.sin(moonInclination);
+        
+        // 月球的绝对位置 = 地球位置 + 月球相对位置
+        const moonX = earthX + moonRelativeX;
+        const moonY = earthY + moonRelativeY;
+        const moonZ = earthZ + moonRelativeZ;
+        
+        moon.position.set(moonX, moonY, moonZ);
+        
+        // 月球自转（同步自转）
+        const moonRotationAngle = (daysSinceEpoch / moonData.rotationPeriod) * 2 * Math.PI;
+        moon.rotation.y = moonRotationAngle;
+    }
+    
     updateLabels() {
         if (!this.labels || !this.camera) return;
         
@@ -582,6 +739,11 @@ class SolarSystem {
         this.planets.forEach(planet => {
             this.calculatePlanetPosition(planet, currentTime);
         });
+        
+        // 更新月球位置
+        if (this.moon) {
+            this.calculateMoonPosition(this.moon, currentTime);
+        }
         
         // 更新小行星带位置
         this.updateAsteroids(currentTime);
