@@ -18,6 +18,9 @@ class SolarSystem {
         this.isPaused = false; // 暂停状态
         this.pausedTime = 0; // 暂停时的累积时间
         
+        // J2000.0 历元: 2000年1月1日 12:00:00 TT
+        this.J2000_EPOCH = new Date('2000-01-01T12:00:00Z').getTime();
+        
         // 真实的天体数据（相对比例，以地球为1）
         this.celestialData = {
             sun: {
@@ -33,95 +36,131 @@ class SolarSystem {
                 name: '水星',
                 radius: 0.383,
                 color: 0x8C7853,
-                distance: 0.39, // AU (半长轴)
-                orbitalPeriod: 88, // 地球日
-                rotationPeriod: 58.6,
-                inclination: 7.0,
-                eccentricity: 0.206 // 偏心率
+                // J2000.0 轨道要素
+                semiMajorAxis: 0.38709927, // AU
+                eccentricity: 0.20563593,
+                inclination: 7.00497902, // 度
+                meanLongitude: 252.25032350, // 度，J2000.0时刻
+                longitudePerihelion: 77.45779628, // 近日点黄经
+                longitudeNode: 48.33076593, // 升交点黄经
+                orbitalPeriod: 87.9691, // 地球日
+                rotationPeriod: 58.6462
             },
             venus: {
                 name: '金星',
                 radius: 0.949,
                 color: 0xFFC649,
-                distance: 0.72,
-                orbitalPeriod: 225,
-                rotationPeriod: 243,
-                inclination: 3.4,
-                eccentricity: 0.007
+                // J2000.0 轨道要素
+                semiMajorAxis: 0.72333566, // AU
+                eccentricity: 0.00677672,
+                inclination: 3.39467605, // 度
+                meanLongitude: 181.97909950, // 度，J2000.0时刻
+                longitudePerihelion: 131.60246718, // 近日点黄经
+                longitudeNode: 76.67984255, // 升交点黄经
+                orbitalPeriod: 224.7008, // 地球日
+                rotationPeriod: -243.0226 // 负值表示逆向自转
             },
             earth: {
                 name: '地球',
                 radius: 1,
                 color: 0x6B93D6,
-                distance: 1,
-                orbitalPeriod: 365.25,
-                rotationPeriod: 1,
-                inclination: 0,
-                eccentricity: 0.017
+                // J2000.0 轨道要素
+                semiMajorAxis: 1.00000261, // AU
+                eccentricity: 0.01671123,
+                inclination: -0.00001531, // 度
+                meanLongitude: 100.46457166, // 度，J2000.0时刻
+                longitudePerihelion: 102.93768193, // 近日点黄经
+                longitudeNode: 0.0, // 升交点黄经（参考平面）
+                orbitalPeriod: 365.25636, // 地球日
+                rotationPeriod: 1.0
             },
             moon: {
                 name: '月球',
                 radius: 0.273,
                 color: 0xC0C0C0,
-                distance: 0.00257, // 距离地球的距离（AU）
-                orbitalPeriod: 27.3, // 地球日
-                rotationPeriod: 27.3, // 同步自转
-                inclination: 5.145,
+                // 月球轨道要素（相对于地球）
+                semiMajorAxis: 0.00257, // AU
                 eccentricity: 0.0549,
+                inclination: 5.145, // 度
+                meanLongitude: 218.3164477, // 度，J2000.0时刻
+                longitudePerihelion: 83.3532465, // 近地点黄经
+                longitudeNode: 125.1228870, // 升交点黄经
+                orbitalPeriod: 27.321661, // 地球日
+                rotationPeriod: 27.321661, // 同步自转
                 parentPlanet: 'earth' // 围绕地球运行
             },
             mars: {
                 name: '火星',
                 radius: 0.532,
                 color: 0xCD5C5C,
-                distance: 1.52,
-                orbitalPeriod: 687,
-                rotationPeriod: 1.03,
-                inclination: 1.85,
-                eccentricity: 0.093
+                // J2000.0 轨道要素
+                semiMajorAxis: 1.52371034, // AU
+                eccentricity: 0.09339410,
+                inclination: 1.84969142, // 度
+                meanLongitude: -4.55343205, // 度，J2000.0时刻
+                longitudePerihelion: -23.94362959, // 近日点黄经
+                longitudeNode: 49.55953891, // 升交点黄经
+                orbitalPeriod: 686.971, // 地球日
+                rotationPeriod: 1.025957
             },
             jupiter: {
                 name: '木星',
                 radius: 11.21,
                 color: 0xD8CA9D,
-                distance: 5.20,
-                orbitalPeriod: 4333,
-                rotationPeriod: 0.41,
-                inclination: 1.3,
-                eccentricity: 0.049,
+                // J2000.0 轨道要素
+                semiMajorAxis: 5.20288700, // AU
+                eccentricity: 0.04838624,
+                inclination: 1.30439695, // 度
+                meanLongitude: 34.39644051, // 度，J2000.0时刻
+                longitudePerihelion: 14.72847983, // 近日点黄经
+                longitudeNode: 100.47390909, // 升交点黄经
+                orbitalPeriod: 4332.59, // 地球日
+                rotationPeriod: 0.41354,
                 sizeAdjustment: 0.3 // 缩小气态巨行星以便观察
             },
             saturn: {
                 name: '土星',
                 radius: 9.45,
                 color: 0xFAD5A5,
-                distance: 9.58,
-                orbitalPeriod: 10759,
-                rotationPeriod: 0.45,
-                inclination: 2.5,
-                eccentricity: 0.057,
+                // J2000.0 轨道要素
+                semiMajorAxis: 9.53667594, // AU
+                eccentricity: 0.05386179,
+                inclination: 2.48599187, // 度
+                meanLongitude: 49.95424423, // 度，J2000.0时刻
+                longitudePerihelion: 92.59887831, // 近日点黄经
+                longitudeNode: 113.66242448, // 升交点黄经
+                orbitalPeriod: 10759.22, // 地球日
+                rotationPeriod: 0.44401,
                 sizeAdjustment: 0.35
             },
             uranus: {
                 name: '天王星',
                 radius: 4.01,
                 color: 0x4FD0E3,
-                distance: 19.20,
-                orbitalPeriod: 30687,
-                rotationPeriod: 0.72,
-                inclination: 0.8,
-                eccentricity: 0.046,
+                // J2000.0 轨道要素
+                semiMajorAxis: 19.18916464, // AU
+                eccentricity: 0.04725744,
+                inclination: 0.77263783, // 度
+                meanLongitude: 313.23810451, // 度，J2000.0时刻
+                longitudePerihelion: 170.95427630, // 近日点黄经
+                longitudeNode: 74.01692503, // 升交点黄经
+                orbitalPeriod: 30688.5, // 地球日
+                rotationPeriod: -0.71833,
                 sizeAdjustment: 0.5
             },
             neptune: {
                 name: '海王星',
                 radius: 3.88,
                 color: 0x4B70DD,
-                distance: 30.05,
-                orbitalPeriod: 60190,
-                rotationPeriod: 0.67,
-                inclination: 1.8,
-                eccentricity: 0.009,
+                // J2000.0 轨道要素
+                semiMajorAxis: 30.06992276, // AU
+                eccentricity: 0.00859048,
+                inclination: 1.77004347, // 度
+                meanLongitude: -55.12002969, // 度，J2000.0时刻
+                longitudePerihelion: 44.96476227, // 近日点黄经
+                longitudeNode: 131.78422574, // 升交点黄经
+                orbitalPeriod: 60182, // 地球日
+                rotationPeriod: 0.6713,
                 sizeAdjustment: 0.5
             }
         };
@@ -130,7 +169,7 @@ class SolarSystem {
         this.scaleFactors = {
             distance: 10, // 距离缩放
             planetSize: 0.5, // 行星大小缩放
-            sunSize: 0.02 // 太阳大小调整为0.01
+            sunSize: 0.015 // 太阳大小调整为0.01
         };
         
         this.init();
@@ -254,7 +293,7 @@ class SolarSystem {
             planet.userData = data;
             
             // 设置初始位置
-            const distance = data.distance * this.scaleFactors.distance;
+            const distance = data.semiMajorAxis * this.scaleFactors.distance;
             planet.position.set(distance, 0, 0);
             
             this.planets.push(planet);
@@ -275,8 +314,8 @@ class SolarSystem {
         this.moon.userData = moonData;
         
         // 初始位置设置在地球附近
-        const earthDistance = this.celestialData.earth.distance * this.scaleFactors.distance;
-        const moonDistance = moonData.distance * this.scaleFactors.distance * 30; // 放大月球轨道以便观察
+        const earthDistance = this.celestialData.earth.semiMajorAxis * this.scaleFactors.distance;
+        const moonDistance = moonData.semiMajorAxis * this.scaleFactors.distance * 30; // 放大月球轨道以便观察
         this.moon.position.set(earthDistance + moonDistance, 0, 0);
         
         this.scene.add(this.moon);
@@ -287,12 +326,9 @@ class SolarSystem {
         
         planetNames.forEach((planetName) => {
             const data = this.celestialData[planetName];
-            const semiMajorAxis = data.distance * this.scaleFactors.distance;
-            const eccentricity = data.eccentricity || 0;
-            const inclination = (data.inclination || 0) * Math.PI / 180;
             
-            // 创建椭圆轨道路径
-            this.createEllipticalOrbit(semiMajorAxis, eccentricity, inclination);
+            // 使用真实轨道要素创建轨道线
+            this.createRealisticOrbit(data);
         });
         
         // 创建月球轨道（围绕地球）
@@ -336,10 +372,10 @@ class SolarSystem {
         const earthData = this.celestialData.earth;
         
         // 地球的位置
-        const earthDistance = earthData.distance * this.scaleFactors.distance;
+        const earthDistance = earthData.semiMajorAxis * this.scaleFactors.distance;
         
         // 月球轨道参数
-        const moonDistance = moonData.distance * this.scaleFactors.distance * 30; // 放大月球轨道以便观察
+        const moonDistance = moonData.semiMajorAxis * this.scaleFactors.distance * 30; // 放大月球轨道以便观察
         const eccentricity = moonData.eccentricity;
         const inclination = (moonData.inclination || 0) * Math.PI / 180;
         
@@ -371,6 +407,59 @@ class SolarSystem {
         const moonOrbit = new THREE.Line(geometry, material);
         this.orbits.push(moonOrbit);
         this.scene.add(moonOrbit);
+    }
+    
+    createRealisticOrbit(data) {
+        const points = [];
+        const segments = 256; // 增加精度
+        
+        // 轨道要素
+        const semiMajorAxis = data.semiMajorAxis * this.scaleFactors.distance;
+        const eccentricity = data.eccentricity || 0;
+        const inclination = (data.inclination || 0) * Math.PI / 180;
+        const longitudePerihelion = (data.longitudePerihelion || 0) * Math.PI / 180;
+        const longitudeNode = (data.longitudeNode || 0) * Math.PI / 180;
+        
+        // 计算轨道平面参数
+        const argumentPerihelion = longitudePerihelion - longitudeNode;
+        
+        // 沿着椭圆轨道计算点
+        for (let i = 0; i <= segments; i++) {
+            // 真近点角从0到2π
+            const trueAnomaly = (i / segments) * 2 * Math.PI;
+            
+            // 计算距离
+            const radius = semiMajorAxis * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(trueAnomaly));
+            
+            // 计算轨道平面坐标
+            const u = trueAnomaly + argumentPerihelion;
+            
+            // 转换为黄道坐标系（与天体位置计算完全相同的算法）
+            const cosU = Math.cos(u);
+            const sinU = Math.sin(u);
+            const cosI = Math.cos(inclination);
+            const sinI = Math.sin(inclination);
+            const cosO = Math.cos(longitudeNode);
+            const sinO = Math.sin(longitudeNode);
+            
+            const x = radius * (cosO * cosU - sinO * sinU * cosI);
+            const y = radius * (sinO * cosU + cosO * sinU * cosI);
+            const z = radius * (sinU * sinI);
+            
+            points.push(new THREE.Vector3(x, z, y)); // 使用与天体位置相同的坐标系转换
+        }
+        
+        // 创建轨道线条
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({
+            color: 0x888888,
+            transparent: true,
+            opacity: 0.7
+        });
+        
+        const orbit = new THREE.Line(geometry, material);
+        this.orbits.push(orbit);
+        this.scene.add(orbit);
     }
     
     createAsteroidBelt() {
@@ -598,18 +687,34 @@ class SolarSystem {
     
     calculatePlanetPosition(planet, time) {
         const data = planet.userData;
-        const semiMajorAxis = data.distance * this.scaleFactors.distance; // 半长轴
-        const eccentricity = data.eccentricity || 0; // 偏心率
-        const inclination = (data.inclination || 0) * Math.PI / 180; // 倾斜角
         
-        // 计算平均近点角（基于当前时间）
-        const daysSinceEpoch = time / (1000 * 60 * 60 * 24);
-        const meanAnomaly = (daysSinceEpoch / data.orbitalPeriod) * 2 * Math.PI;
+        // 计算从J2000.0历元到现在的天数
+        const daysSinceJ2000 = (time - this.J2000_EPOCH) / (1000 * 60 * 60 * 24);
         
-        // 用迭代法求解偏心近点角（简化的牛顿迭代）
+        // 轨道要素
+        const semiMajorAxis = data.semiMajorAxis * this.scaleFactors.distance;
+        const eccentricity = data.eccentricity || 0;
+        const inclination = (data.inclination || 0) * Math.PI / 180;
+        const meanLongitudeAtEpoch = (data.meanLongitude || 0) * Math.PI / 180;
+        const longitudePerihelion = (data.longitudePerihelion || 0) * Math.PI / 180;
+        const longitudeNode = (data.longitudeNode || 0) * Math.PI / 180;
+        
+        // 计算平均运动（弧度每天）
+        const meanMotion = (2 * Math.PI) / data.orbitalPeriod;
+        
+        // 计算当前时刻的平均黄经
+        const meanLongitude = meanLongitudeAtEpoch + meanMotion * daysSinceJ2000;
+        
+        // 计算平均近点角
+        const meanAnomaly = meanLongitude - longitudePerihelion;
+        
+        // 用迭代法求解偏心近点角（开普勒方程）
         let eccentricAnomaly = meanAnomaly;
-        for (let i = 0; i < 5; i++) {
-            eccentricAnomaly = meanAnomaly + eccentricity * Math.sin(eccentricAnomaly);
+        for (let i = 0; i < 10; i++) {
+            const deltaE = (eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly) - meanAnomaly) / 
+                          (1 - eccentricity * Math.cos(eccentricAnomaly));
+            eccentricAnomaly -= deltaE;
+            if (Math.abs(deltaE) < 1e-8) break;
         }
         
         // 计算真近点角
@@ -618,76 +723,84 @@ class SolarSystem {
             Math.sqrt(1 - eccentricity) * Math.cos(eccentricAnomaly / 2)
         );
         
-        // 计算距离（椭圆径向距离）
-        const radius = semiMajorAxis * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(trueAnomaly));
+        // 计算距离（天文单位）
+        const radius = semiMajorAxis * (1 - eccentricity * Math.cos(eccentricAnomaly));
         
-        // 在轨道平面上的位置
-        const xOrbit = radius * Math.cos(trueAnomaly);
-        const zOrbit = radius * Math.sin(trueAnomaly);
+        // 计算轨道平面坐标
+        const argumentPerihelion = longitudePerihelion - longitudeNode;
+        const u = trueAnomaly + argumentPerihelion;
         
-        // 考虑轨道倾斜角的3D位置计算
-        const x = xOrbit;
-        const y = zOrbit * Math.sin(inclination);
-        const z = zOrbit * Math.cos(inclination);
+        // 转换为黄道坐标系
+        const cosU = Math.cos(u);
+        const sinU = Math.sin(u);
+        const cosI = Math.cos(inclination);
+        const sinI = Math.sin(inclination);
+        const cosO = Math.cos(longitudeNode);
+        const sinO = Math.sin(longitudeNode);
         
-        planet.position.set(x, y, z);
+        const x = radius * (cosO * cosU - sinO * sinU * cosI);
+        const y = radius * (sinO * cosU + cosO * sinU * cosI);
+        const z = radius * (sinU * sinI);
+        
+        planet.position.set(x, z, y); // 注意坐标系转换
         
         // 行星自转
-        const rotationAngle = (daysSinceEpoch / data.rotationPeriod) * 2 * Math.PI;
-        planet.rotation.y = rotationAngle;
+        const rotationAngle = (daysSinceJ2000 / Math.abs(data.rotationPeriod)) * 2 * Math.PI;
+        planet.rotation.y = data.rotationPeriod > 0 ? rotationAngle : -rotationAngle;
     }
     
     calculateMoonPosition(moon, time) {
         const moonData = moon.userData;
-        const earthData = this.celestialData.earth;
         
-        // 首先计算地球的当前位置
-        const earthDistance = earthData.distance * this.scaleFactors.distance;
-        const earthEccentricity = earthData.eccentricity || 0;
-        const earthInclination = (earthData.inclination || 0) * Math.PI / 180;
+        // 首先获取地球的当前位置
+        const earthPlanet = this.planets.find(p => p.userData.name === '地球');
+        if (!earthPlanet) return;
         
-        const daysSinceEpoch = time / (1000 * 60 * 60 * 24);
-        const earthMeanAnomaly = (daysSinceEpoch / earthData.orbitalPeriod) * 2 * Math.PI;
+        const earthX = earthPlanet.position.x;
+        const earthY = earthPlanet.position.y;
+        const earthZ = earthPlanet.position.z;
         
-        // 计算地球的椭圆轨道位置
-        let earthEccentricAnomaly = earthMeanAnomaly;
-        for (let i = 0; i < 5; i++) {
-            earthEccentricAnomaly = earthMeanAnomaly + earthEccentricity * Math.sin(earthEccentricAnomaly);
+        // 计算从J2000.0历元到现在的天数
+        const daysSinceJ2000 = (time - this.J2000_EPOCH) / (1000 * 60 * 60 * 24);
+        
+        // 月球相对于地球的轨道计算
+        const moonDistance = moonData.semiMajorAxis * this.scaleFactors.distance * 30; // 放大月球轨道
+        const eccentricity = moonData.eccentricity || 0;
+        const inclination = (moonData.inclination || 0) * Math.PI / 180;
+        const meanLongitudeAtEpoch = (moonData.meanLongitude || 0) * Math.PI / 180;
+        const longitudePerihelion = (moonData.longitudePerihelion || 0) * Math.PI / 180;
+        
+        // 计算平均运动
+        const meanMotion = (2 * Math.PI) / moonData.orbitalPeriod;
+        
+        // 计算当前时刻的平均黄经
+        const meanLongitude = meanLongitudeAtEpoch + meanMotion * daysSinceJ2000;
+        
+        // 计算平均近点角
+        const meanAnomaly = meanLongitude - longitudePerihelion;
+        
+        // 求解偏心近点角
+        let eccentricAnomaly = meanAnomaly;
+        for (let i = 0; i < 10; i++) {
+            const deltaE = (eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly) - meanAnomaly) / 
+                          (1 - eccentricity * Math.cos(eccentricAnomaly));
+            eccentricAnomaly -= deltaE;
+            if (Math.abs(deltaE) < 1e-8) break;
         }
         
-        const earthTrueAnomaly = 2 * Math.atan2(
-            Math.sqrt(1 + earthEccentricity) * Math.sin(earthEccentricAnomaly / 2),
-            Math.sqrt(1 - earthEccentricity) * Math.cos(earthEccentricAnomaly / 2)
+        // 计算真近点角
+        const trueAnomaly = 2 * Math.atan2(
+            Math.sqrt(1 + eccentricity) * Math.sin(eccentricAnomaly / 2),
+            Math.sqrt(1 - eccentricity) * Math.cos(eccentricAnomaly / 2)
         );
         
-        const earthRadius = earthDistance * (1 - earthEccentricity * earthEccentricity) / (1 + earthEccentricity * Math.cos(earthTrueAnomaly));
-        const earthX = earthRadius * Math.cos(earthTrueAnomaly);
-        const earthZ = earthRadius * Math.sin(earthTrueAnomaly) * Math.cos(earthInclination);
-        const earthY = earthRadius * Math.sin(earthTrueAnomaly) * Math.sin(earthInclination);
+        // 计算距离
+        const radius = moonDistance * (1 - eccentricity * Math.cos(eccentricAnomaly));
         
-        // 计算月球相对于地球的位置
-        const moonDistance = moonData.distance * this.scaleFactors.distance * 30; // 放大月球轨道
-        const moonEccentricity = moonData.eccentricity || 0;
-        const moonInclination = (moonData.inclination || 0) * Math.PI / 180;
-        
-        const moonMeanAnomaly = (daysSinceEpoch / moonData.orbitalPeriod) * 2 * Math.PI;
-        
-        let moonEccentricAnomaly = moonMeanAnomaly;
-        for (let i = 0; i < 5; i++) {
-            moonEccentricAnomaly = moonMeanAnomaly + moonEccentricity * Math.sin(moonEccentricAnomaly);
-        }
-        
-        const moonTrueAnomaly = 2 * Math.atan2(
-            Math.sqrt(1 + moonEccentricity) * Math.sin(moonEccentricAnomaly / 2),
-            Math.sqrt(1 - moonEccentricity) * Math.cos(moonEccentricAnomaly / 2)
-        );
-        
-        const moonRadius = moonDistance * (1 - moonEccentricity * moonEccentricity) / (1 + moonEccentricity * Math.cos(moonTrueAnomaly));
-        
-        // 月球在自己轨道上的相对位置
-        const moonRelativeX = moonRadius * Math.cos(moonTrueAnomaly);
-        const moonRelativeZ = moonRadius * Math.sin(moonTrueAnomaly) * Math.cos(moonInclination);
-        const moonRelativeY = moonRadius * Math.sin(moonTrueAnomaly) * Math.sin(moonInclination);
+        // 月球在轨道平面上的相对位置
+        const moonRelativeX = radius * Math.cos(trueAnomaly);
+        const moonRelativeZ = radius * Math.sin(trueAnomaly) * Math.cos(inclination);
+        const moonRelativeY = radius * Math.sin(trueAnomaly) * Math.sin(inclination);
         
         // 月球的绝对位置 = 地球位置 + 月球相对位置
         const moonX = earthX + moonRelativeX;
@@ -697,7 +810,7 @@ class SolarSystem {
         moon.position.set(moonX, moonY, moonZ);
         
         // 月球自转（同步自转）
-        const moonRotationAngle = (daysSinceEpoch / moonData.rotationPeriod) * 2 * Math.PI;
+        const moonRotationAngle = (daysSinceJ2000 / moonData.rotationPeriod) * 2 * Math.PI;
         moon.rotation.y = moonRotationAngle;
     }
     
