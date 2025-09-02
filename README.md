@@ -1,0 +1,123 @@
+# 太阳系 3D 可视化 - TypeScript 版本
+
+使用 Three.js 和 TypeScript 构建的交互式 3D 太阳系可视化项目。
+
+## 🚀 快速开始
+
+### 使用开发脚本（推荐）
+
+```bash
+# 启动开发模式（自动编译 + 本地服务器）
+./dev.sh
+```
+
+### 手动构建
+
+```bash
+# 编译 TypeScript
+./build.sh
+
+# 或者使用 npm 脚本
+npm run build
+
+# 启动本地服务器
+npm run serve
+```
+
+### 开发模式
+
+```bash
+# 监听文件变化并自动编译
+npm run dev
+```
+
+## 📁 项目结构
+
+```
+SolarSystem/
+├── src/
+│   └── solar-system.ts    # 主要的太阳系类（TypeScript）
+├── types/
+│   └── index.ts           # TypeScript 类型定义
+├── dist/                  # 编译后的 JavaScript 文件
+├── index.html             # 主页面
+├── tsconfig.json          # TypeScript 配置
+├── package.json           # 项目依赖和脚本
+├── build.sh              # 构建脚本
+└── dev.sh                # 开发启动脚本
+```
+
+## 🛠️ 技术栈
+
+- **TypeScript** - 类型安全的 JavaScript
+- **Three.js** - 3D 图形库
+- **ES Modules** - 现代模块系统
+- **Import Maps** - 浏览器原生模块解析
+
+## ✨ 功能特性
+
+- 🌟 **双时间模式**：实时观察和加速动画之间切换
+- 🔭 **精确轨道**：基于真实天文数据的椭圆轨道
+- 🎯 **智能缩放**：可调节的天体尺寸比例
+- 🏷️ **动态标签**：跟随天体移动的名称标签
+- 💫 **小行星带**：1200个独立小行星的真实分布
+- ⌨️ **键盘控制**：空格键暂停/继续动画
+- 📱 **响应式设计**：支持不同屏幕尺寸
+
+## 🎮 控制说明
+
+- **鼠标左键拖拽**：旋转视角
+- **鼠标滚轮**：缩放
+- **鼠标右键拖拽**：平移
+- **空格键**：在运动模式下暂停/继续
+- **切换按钮**：在静态模式和运动模式之间切换
+
+## 🔧 开发说明
+
+### TypeScript 配置
+
+项目使用严格的 TypeScript 配置，包括：
+- 严格类型检查
+- 未使用变量检查
+- 准确的可选属性类型
+- 源码映射支持
+
+### 类型定义
+
+主要类型定义在 `types/index.ts` 中：
+- `CelestialBodyData` - 天体数据接口
+- `CelestialDataCollection` - 天体集合接口
+- `TimeMode` - 时间模式类型
+- `Vector3D` - 3D 向量接口
+
+### 构建系统
+
+- TypeScript 编译到 `dist/` 目录
+- ES2020 模块目标
+- 支持 Three.js 类型定义
+- 自动生成声明文件
+
+## 📊 天体数据
+
+所有天体数据基于真实的天文参数：
+- 轨道要素（半长轴、偏心率、倾斜角等）
+- 物理属性（半径、颜色）
+- 旋转周期
+- J2000.0 历元参考
+
+## 🌌 坐标系统
+
+使用黄道坐标系进行天体位置计算，并转换到 Three.js 的右手坐标系用于渲染。
+
+## 📋 系统要求
+
+- 现代浏览器（支持 ES Modules 和 Import Maps）
+- TypeScript 编译器（全局安装或通过 npm）
+- Python 3（用于本地开发服务器）
+
+## 🤝 开发贡献
+
+1. 修改 TypeScript 源码在 `src/` 目录
+2. 运行 `npm run build` 编译
+3. 测试功能
+4. 提交更改

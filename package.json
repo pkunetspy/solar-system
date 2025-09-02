@@ -1,0 +1,25 @@
+{
+  "name": "solar-system-visualization",
+  "version": "1.0.0",
+  "description": "Interactive 3D Solar System Visualization with TypeScript",
+  "main": "dist/solar-system.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "python3 -m http.server 8000",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/three": "^0.152.1",
+    "typescript": "^5.9.2"
+  },
+  "keywords": [
+    "three.js",
+    "solar-system",
+    "astronomy",
+    "visualization",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}
