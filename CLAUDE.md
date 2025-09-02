@@ -4,26 +4,78 @@
 
 ## 项目概述
 
-这是一个使用纯 HTML、CSS 和 JavaScript 以及 Three.js 构建的交互式 3D 太阳系可视化项目。该项目使用准确的天文数据、椭圆轨道和双时间模式模拟真实的太阳系。
+这是一个使用 TypeScript、Three.js 构建的交互式 3D 太阳系可视化项目。该项目使用准确的天文数据、椭圆轨道和双时间模式模拟真实的太阳系。项目已完全重构为 TypeScript 架构，提供完整的类型安全和现代化开发体验。
+
+## 技术栈
+
+- **TypeScript** - 完整类型安全的开发体验
+- **Three.js** - 3D 图形渲染库 (v0.152.2)
+- **ES2020 模块** - 现代化模块系统
+- **Import Maps** - 浏览器原生模块解析
 
 ## 运行方法
 
-直接在网页浏览器中打开 `index.html` 即可。不需要构建过程或服务器 - 这是一个客户端网页应用程序。
+### 开发模式（推荐）
+```bash
+# 启动开发模式（自动编译 + 本地服务器）
+./dev.sh
+```
 
-项目使用 CDN 链接引入依赖库：
-- Three.js r128
-- Three.js OrbitControls
+### 手动构建
+```bash
+# 编译 TypeScript
+./build.sh
+# 或使用 npm
+npm run build
 
-## 核心架构
+# 启动本地服务器
+npm run serve
+```
 
-### 主要组件
+### 监听模式
+```bash
+# 文件变化时自动重新编译
+npm run dev
+```
 
-**SolarSystem 类** (`solar-system.js`)：包含所有仿真逻辑的主应用程序类
+## 项目结构
+
+### 核心文件结构
+```
+SolarSystem/
+├── src/
+│   └── solar-system.ts       # 主应用程序类 (TypeScript)
+├── types/
+│   └── index.ts             # TypeScript 类型定义
+├── dist/                    # 编译输出目录
+│   ├── solar-system.js      # 编译后的 JavaScript
+│   ├── solar-system.d.ts    # 类型声明文件
+│   └── *.map               # 源码映射文件
+├── index.html              # 主页面（使用 ES 模块）
+├── tsconfig.json           # TypeScript 配置
+├── package.json            # 项目依赖和脚本
+├── build.sh               # 构建脚本
+├── dev.sh                 # 开发启动脚本
+└── README.md              # 项目文档
+```
+
+### 源码组织
+
+**SolarSystem 类** (`src/solar-system.ts`)：包含所有仿真逻辑的主应用程序类
 - **场景管理**：Three.js 场景、相机、渲染器、光照设置
-- **天体对象**：太阳、8颗行星、1200+ 个小行星，具有真实数据
+- **天体对象**：太阳、8颗行星、月球、1200+ 个小行星，具有真实数据
 - **时间系统**：双模式系统（静态/动画），具有可配置的时间尺度
 - **轨道计算**：使用偏心率和倾斜角的真实椭圆轨道数学
 - **界面管理**：动态标签、时间控制和模式切换
+
+**类型定义** (`types/index.ts`)：完整的 TypeScript 接口定义
+- `CelestialBodyData` - 天体数据结构
+- `CelestialDataCollection` - 天体集合类型
+- `TimeMode` - 时间模式枚举
+- `LabelData` - 标签数据接口
+- `ScaleFactors` - 缩放因子接口
+
+## 核心架构
 
 ### 数据结构
 
@@ -54,6 +106,7 @@
 - 禁用阴影系统以防止太空环境中的视觉伪影
 - 使用屏幕空间投影的动态标签定位
 - 小行星带使用实例化几何体方法以提高性能
+- TypeScript 类型检查确保运行时稳定性
 
 ## 关键特性
 
@@ -63,13 +116,69 @@
 **动态标签**：行星名称跟随天体并处理遮挡
 **小行星带**：1200个独立小行星，具有真实分布和运动
 **空格键控制**：在动画模式下按空格键可暂停/继续时间演进
+**类型安全**：完整的 TypeScript 类型检查和智能提示
 
 ## 开发说明
 
-修改天体数据时，请保持 `celestialData` 对象中建立的结构。距离值以 AU 为单位，周期以地球日为单位。
+### TypeScript 开发流程
+1. 修改 `src/solar-system.ts` 源码
+2. 运行 `npm run build` 编译或 `npm run dev` 监听模式
+3. 在浏览器中测试功能
+4. 类型错误会在编译时被捕获
 
+### 代码规范
+- 使用 4 个空格缩进
+- 严格 TypeScript 配置，包括未使用变量检查
+- 接口优先的类型设计
+- 私有方法使用 `private` 修饰符
+
+### 天体数据修改
+修改天体数据时，请保持 `celestialData` 对象中建立的结构。距离值以 AU 为单位，周期以地球日为单位。类型定义确保数据结构的一致性。
+
+### 性能考虑
 出于性能考虑，小行星计数和细节级别在保持视觉冲击的同时平衡了流畅的动画效果。
 
 时间系统需要在所有动画计算中一致使用 `getSimulationTime()` 以保持模式之间的同步。
 
 UI 元素使用固定定位和 z-index 管理，以便在 3D 画布上正确分层。
+
+## 构建系统
+
+### TypeScript 配置
+- 目标：ES2020
+- 模块：ES2020
+- 严格模式启用
+- 生成声明文件和源码映射
+- Three.js 类型支持
+
+### 依赖管理
+```json
+{
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/three": "^0.152.1"
+  }
+}
+```
+
+### 部署说明
+编译后的文件位于 `dist/` 目录，`index.html` 已配置为使用编译后的 ES 模块。可直接部署到静态文件服务器。
+
+## 常用命令
+
+```bash
+# 编译项目
+npm run build
+
+# 开发监听模式
+npm run dev
+
+# 启动本地服务器
+npm run serve
+
+# 清理构建产物
+npm run clean
+
+# 快速开发启动
+./dev.sh
+```
