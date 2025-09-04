@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "lib": ["ES2020", "DOM"],
     "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -26,8 +27,7 @@
     "checkJs": false
   },
   "include": [
-    "src/**/*",
-    "types/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
