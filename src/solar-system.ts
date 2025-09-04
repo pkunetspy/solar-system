@@ -287,6 +287,43 @@ export class SolarSystem {
       this.sun = new THREE.Mesh(geometry, material);
       this.sun.userData = this.celestialData.sun;
       this.scene.add(this.sun);
+
+      // 添加太阳光晕效果
+      this.createSunGlow(sunRadius);
+    }
+
+    private createSunGlow(sunRadius: number): void {
+      if (!this.scene) return;
+
+      // 创建一个简单但明显的光晕效果
+      const glowRadius = sunRadius * 3; // 3倍太阳半径
+      const maxRadius = 1.8; // 确保不与水星轨道重叠
+      const actualRadius = Math.min(glowRadius, maxRadius);
+
+      // 创建光晕几何体
+      const glowGeometry = new THREE.SphereGeometry(actualRadius, 32, 32);
+      
+      // 使用一个非常明显的材质
+      const glowMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFF0000, // 纯红色，非常明显
+        transparent: true,
+        opacity: 0.3,    // 30% 透明度
+        side: THREE.DoubleSide,
+        blending: THREE.NormalBlending, // 使用正常混合，不是叠加
+        depthWrite: false
+      });
+
+      const sunGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+      sunGlow.position.set(0, 0, 0);
+      
+      // 确保在太阳后面渲染
+      sunGlow.renderOrder = -1;
+      
+      if (this.scene) {
+        this.scene.add(sunGlow);
+      }
+
+      console.log('Sun glow added with radius:', actualRadius, 'Sun radius:', sunRadius);
     }
 
     private createPlanets(): void {
