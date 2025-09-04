@@ -26,3 +26,6 @@ npm-debug.log*
 # 临时文件
 .tmp/
 .cache/
+
+# Claude Code 本地配置
+.claude/settings.local.json
