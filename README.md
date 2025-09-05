@@ -1,6 +1,6 @@
 # 太阳系 3D 可视化 - TypeScript 版本
 
-使用 Three.js 和 TypeScript 构建的交互式 3D 太阳系可视化项目，具有真实的日冕光晕效果。
+使用 Three.js 和 TypeScript 构建的交互式 3D 太阳系可视化项目，使用真实准确的天文数据来模拟真实的太阳系，可以从不同的视角来查看太阳系中八大行星的位置，并支持时间快速演化。
 
 ## 🚀 快速开始
 
@@ -24,6 +24,17 @@ play.bat
 npm run play
 # 或者使用 start 命令
 npm start
+```
+
+#### 🔧 便捷开发命令
+```bash
+# 杀掉占用8000端口的进程
+npm run kill-port
+# 或直接运行脚本
+./kill-port-8000.sh
+
+# 重启服务器（杀掉旧进程并启动新的）
+npm run restart
 ```
 
 ### 🛠️ 开发者模式

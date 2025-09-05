@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-该文件为 Claude Code (claude.ai/code) 在此代码库中工作时提供指导。
+该文件为 Claude Code (claude.ai/code) 在此代码库中工作时提供指导，每次进行代码修改之后应该主动同步本文件以及 README.md 文件中的相关内容。
 
 ## 项目概述
 
-这是一个使用 TypeScript、Three.js 构建的交互式 3D 太阳系可视化项目。该项目使用准确的天文数据、椭圆轨道和双时间模式模拟真实的太阳系。项目已完全重构为 TypeScript 架构，提供完整的类型安全和现代化开发体验。
+这是一个使用 TypeScript、Three.js 构建的交互式 3D 太阳系可视化项目，该项目使用准确的天文数据来尽可能模拟真实的太阳系。项目已完全重构为模块化的 TypeScript 架构，提供完整的类型安全和现代化开发体验。
 
 ## 技术栈
 
@@ -15,86 +15,116 @@
 
 ## 运行方法
 
-### 开发模式（推荐）
+### 用户模式（推荐）
+```bash
+# 一键启动（自动处理所有步骤并打开浏览器）
+./play.sh          # macOS/Linux
+play.bat            # Windows
+npm run play        # 跨平台
+```
+
+### 开发模式
 ```bash
 # 启动开发模式（自动编译 + 本地服务器）
-./dev.sh
+./dev.sh            # macOS/Linux
+./dev.bat           # Windows
+
+# 或者手动步骤
+npm run build       # 编译 TypeScript
+npm run serve       # 启动本地服务器
 ```
 
-### 手动构建
+### 便捷开发命令
 ```bash
-# 编译 TypeScript
-./build.sh
-# 或使用 npm
-npm run build
-
-# 启动本地服务器
-npm run serve
-```
-
-### 监听模式
-```bash
-# 文件变化时自动重新编译
-npm run dev
+npm run kill-port   # 杀掉占用8000端口的进程
+npm run restart     # 重启服务器（杀掉旧进程并启动新的）
 ```
 
 ## 项目结构
 
-### 核心文件结构
+### 重构后的模块化架构
 ```
 SolarSystem/
 ├── src/
-│   └── solar-system.ts       # 主应用程序类 (TypeScript)
-├── types/
-│   └── index.ts             # TypeScript 类型定义
-├── dist/                    # 编译输出目录
-│   ├── solar-system.js      # 编译后的 JavaScript
-│   ├── solar-system.d.ts    # 类型声明文件
-│   └── *.map               # 源码映射文件
-├── index.html              # 主页面（使用 ES 模块）
-├── tsconfig.json           # TypeScript 配置
-├── package.json            # 项目依赖和脚本
-├── build.sh               # 构建脚本
-├── dev.sh                 # 开发启动脚本
-└── README.md              # 项目文档
+│   ├── solar-system.ts       # 主协调类 (127行)
+│   ├── data/
+│   │   └── celestialData.ts  # 天体数据和配置
+│   ├── utils/
+│   │   └── orbitalMath.ts    # 轨道计算工具
+│   ├── systems/
+│   │   ├── timeSystem.ts     # 时间系统管理
+│   │   └── renderSystem.ts   # 渲染系统管理
+│   ├── objects/
+│   │   └── celestialObjects.ts # 天体对象创建
+│   ├── effects/
+│   │   └── sunEffects.ts     # 太阳光晕效果
+│   └── types/
+│       └── index.ts          # TypeScript 类型定义
+├── dist/                     # 编译输出目录
+├── scripts/
+│   └── play.js              # 跨平台启动脚本
+├── index.html               # 主页面（使用 ES 模块）
+├── tsconfig.json            # TypeScript 配置
+├── package.json             # 项目依赖和脚本
+├── kill-port-8000.sh        # 端口管理脚本
+├── play.sh/play.bat         # 一键启动脚本
+├── dev.sh/dev.bat           # 开发启动脚本
+└── README.md               # 项目文档
 ```
 
-### 源码组织
+### 模块职责划分
 
-**SolarSystem 类** (`src/solar-system.ts`)：包含所有仿真逻辑的主应用程序类
-- **场景管理**：Three.js 场景、相机、渲染器、光照设置
-- **天体对象**：太阳、8颗行星、月球、1200+ 个小行星，具有真实数据
-- **时间系统**：双模式系统（静态/动画），具有可配置的时间尺度
-- **轨道计算**：使用偏心率和倾斜角的真实椭圆轨道数学
-- **界面管理**：动态标签、时间控制和模式切换
+**主协调类** (`src/solar-system.ts`)：轻量级协调器，管理各模块协作
+- 初始化各个系统模块
+- 协调动画循环
+- 管理天体位置更新
 
-**类型定义** (`types/index.ts`)：完整的 TypeScript 接口定义
-- `CelestialBodyData` - 天体数据结构
-- `CelestialDataCollection` - 天体集合类型
-- `TimeMode` - 时间模式枚举
-- `LabelData` - 标签数据接口
-- `ScaleFactors` - 缩放因子接口
+**数据层** (`src/data/celestialData.ts`)：集中管理配置数据
+- 天体物理数据（半径、颜色、轨道参数等）
+- 缩放因子配置
+- J2000历元常量
+
+**工具层** (`src/utils/orbitalMath.ts`)：纯函数计算工具
+- 椭圆轨道位置计算
+- 天体自转角度计算
+- 轨道路径生成
+
+**系统层** (`src/systems/`)：核心功能模块
+- `timeSystem.ts`: 双时间模式、暂停控制、UI管理
+- `renderSystem.ts`: Three.js场景管理、相机控制、标签系统
+
+**对象层** (`src/objects/celestialObjects.ts`)：3D对象创建与管理
+- 太阳、行星、月球创建
+- 小行星带生成
+- 轨道线条创建
+
+**效果层** (`src/effects/sunEffects.ts`)：视觉效果
+- 太阳日冕光晕效果
+- 着色器程序管理
 
 ## 核心架构
 
-### 数据结构
+### 模块化设计原则
+1. **单一责任原则**：每个模块只负责一个特定功能
+2. **依赖注入**：通过构造函数传递依赖，便于测试
+3. **接口隔离**：清晰的公共API，隐藏内部实现
+4. **开闭原则**：易于扩展新功能，无需修改现有代码
 
-**celestialData 对象**：包含所有天体的真实天文数据：
+### 数据结构
+**celestialData 对象**：包含所有天体的真实天文数据
 - 物理属性（半径、颜色）
 - 轨道参数（距离、周期、偏心率、倾斜角）
 - 旋转数据（自转周期）
 - 显示调整（气态巨行星的尺寸调整）
 
 ### 时间系统架构
-
 两种不同的时间模式：
 - **静态模式**：基于 `Date.now()` 的实时时间，行星运动最小
 - **动画模式**：加速时间（1秒 = 1周），戏剧性的运动可视化
 
-时间计算通过 `getSimulationTime()` 方法处理，所有天体对象更新都引用该方法。
+时间计算通过 `TimeSystem.getSimulationTime()` 方法处理，所有天体对象更新都引用该方法。
 
 ### 轨道数学
-
 使用真实的椭圆轨道计算：
 1. 基于轨道周期的平均近点角计算
 2. 通过牛顿迭代求解偏心近点角
@@ -102,7 +132,6 @@ SolarSystem/
 4. 使用轨道倾斜变换进行 3D 定位
 
 ### 渲染优化
-
 - 禁用阴影系统以防止太空环境中的视觉伪影
 - 使用屏幕空间投影的动态标签定位
 - 小行星带使用实例化几何体方法以提高性能
@@ -121,26 +150,32 @@ SolarSystem/
 ## 开发说明
 
 ### TypeScript 开发流程
-1. 修改 `src/solar-system.ts` 源码
+1. 修改相应模块的源码文件
 2. 运行 `npm run build` 编译或 `npm run dev` 监听模式
 3. 在浏览器中测试功能
 4. 类型错误会在编译时被捕获
 
 ### 代码规范
-- 使用 4 个空格缩进
-- 严格 TypeScript 配置，包括未使用变量检查
-- 接口优先的类型设计
-- 私有方法使用 `private` 修饰符
+- **文件大小限制**：单个文件代码行数不超过 1000 行
+- **缩进规范**：使用 4 个空格缩进
+- **严格 TypeScript 配置**：包括未使用变量检查
+- **接口优先的类型设计**
+- **私有方法使用 `private` 修饰符**
+- **ES模块导入必须包含 `.js` 扩展名**
+
+### 添加新功能的最佳实践
+1. **确定功能归属**：根据单一责任原则选择合适的模块
+2. **类型优先**：先在 `types/index.ts` 中定义相关接口
+3. **测试驱动**：编写功能前先考虑如何测试
+4. **文档同步**：更新相关的代码注释和README
 
 ### 天体数据修改
 修改天体数据时，请保持 `celestialData` 对象中建立的结构。距离值以 AU 为单位，周期以地球日为单位。类型定义确保数据结构的一致性。
 
 ### 性能考虑
-出于性能考虑，小行星计数和细节级别在保持视觉冲击的同时平衡了流畅的动画效果。
-
-时间系统需要在所有动画计算中一致使用 `getSimulationTime()` 以保持模式之间的同步。
-
-UI 元素使用固定定位和 z-index 管理，以便在 3D 画布上正确分层。
+- 出于性能考虑，小行星计数和细节级别在保持视觉冲击的同时平衡了流畅的动画效果
+- 时间系统需要在所有动画计算中一致使用 `TimeSystem.getSimulationTime()` 以保持模式之间的同步
+- UI 元素使用固定定位和 z-index 管理，以便在 3D 画布上正确分层
 
 ## 构建系统
 
@@ -150,6 +185,7 @@ UI 元素使用固定定位和 z-index 管理，以便在 3D 画布上正确分�
 - 严格模式启用
 - 生成声明文件和源码映射
 - Three.js 类型支持
+- ES模块导入支持.js扩展名
 
 ### 依赖管理
 ```json
@@ -179,6 +215,15 @@ npm run serve
 # 清理构建产物
 npm run clean
 
+# 一键启动（用户模式）
+npm run play
+npm start
+
+# 端口管理
+npm run kill-port
+npm run restart
+
 # 快速开发启动
-./dev.sh
+./dev.sh          # macOS/Linux
+./dev.bat         # Windows
 ```

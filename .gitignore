@@ -3,6 +3,10 @@ dist/
 *.js.map
 *.d.ts.map
 
+# 备份文件（使用 git 管理版本，不需要手动备份）
+*-backup.*
+*.backup.*
+
 # 依赖
 node_modules/
 
