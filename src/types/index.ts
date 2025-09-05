@@ -26,6 +26,7 @@ export interface CelestialDataCollection {
     saturn: CelestialBodyData;
     uranus: CelestialBodyData;
     neptune: CelestialBodyData;
+    pluto: CelestialBodyData;
     moon: CelestialBodyData;
 }
 

@@ -137,6 +137,20 @@ export const celestialData: CelestialDataCollection = {
         orbitalPeriod: 60182,
         rotationPeriod: 0.6713,
         scaleFactor: 0.5
+    },
+    pluto: {
+        name: '冥王星',
+        radius: 0.186,
+        color: 0xA0522D,
+        semiMajorAxis: 39.48211675,
+        eccentricity: 0.24880766,
+        inclination: 17.14001206,
+        meanLongitude: 238.92903833,
+        longitudePerihelion: 224.06891629,
+        longitudeNode: 110.30393684,
+        orbitalPeriod: 90560,
+        rotationPeriod: 6.387230,
+        scaleFactor: 5.0
     }
 };
 

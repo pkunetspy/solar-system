@@ -47,7 +47,7 @@ export class CelestialObjects {
      */
     private createPlanets(): void {
         const planetNames: (keyof CelestialDataCollection)[] = 
-            ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+            ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
 
         planetNames.forEach((planetName) => {
             const data = celestialData[planetName];
@@ -99,7 +99,7 @@ export class CelestialObjects {
      */
     private createOrbits(): void {
         const planetNames: (keyof CelestialDataCollection)[] = 
-            ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+            ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
 
         planetNames.forEach((planetName) => {
             const data = celestialData[planetName];

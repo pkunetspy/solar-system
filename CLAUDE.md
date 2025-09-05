@@ -42,34 +42,34 @@ npm run restart     # 重启服务器（杀掉旧进程并启动新的）
 
 ## 项目结构
 
-### 重构后的模块化架构
+### 模块化架构
 ```
 SolarSystem/
 ├── src/
-│   ├── solar-system.ts       # 主协调类 (127行)
+│   ├── solar-system.ts         # 主协调类
 │   ├── data/
-│   │   └── celestialData.ts  # 天体数据和配置
+│   │   └── celestialData.ts    # 天体数据和配置
 │   ├── utils/
-│   │   └── orbitalMath.ts    # 轨道计算工具
+│   │   └── orbitalMath.ts      # 轨道计算工具
 │   ├── systems/
-│   │   ├── timeSystem.ts     # 时间系统管理
-│   │   └── renderSystem.ts   # 渲染系统管理
+│   │   ├── timeSystem.ts       # 时间系统管理
+│   │   └── renderSystem.ts     # 渲染系统管理
 │   ├── objects/
 │   │   └── celestialObjects.ts # 天体对象创建
 │   ├── effects/
-│   │   └── sunEffects.ts     # 太阳光晕效果
+│   │   └── sunEffects.ts       # 太阳光晕效果
 │   └── types/
-│       └── index.ts          # TypeScript 类型定义
-├── dist/                     # 编译输出目录
+│       └── index.ts            # TypeScript 类型定义
+├── dist/                       # 编译输出目录
 ├── scripts/
-│   └── play.js              # 跨平台启动脚本
-├── index.html               # 主页面（使用 ES 模块）
-├── tsconfig.json            # TypeScript 配置
-├── package.json             # 项目依赖和脚本
-├── kill-port-8000.sh        # 端口管理脚本
-├── play.sh/play.bat         # 一键启动脚本
-├── dev.sh/dev.bat           # 开发启动脚本
-└── README.md               # 项目文档
+│   └── play.js                 # 跨平台启动脚本
+├── index.html                  # 主页面（使用 ES 模块）
+├── tsconfig.json               # TypeScript 配置
+├── package.json                # 项目依赖和脚本
+├── kill-port-8000.sh           # 端口管理脚本
+├── play.sh/play.bat            # 一键启动脚本
+├── dev.sh/dev.bat              # 开发启动脚本
+└── README.md                   # 项目文档
 ```
 
 ### 模块职责划分

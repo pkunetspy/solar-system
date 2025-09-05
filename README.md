@@ -70,23 +70,7 @@ npm run dev
 
 ## 📁 项目结构
 
-```
-SolarSystem/
-├── src/
-│   ├── solar-system.ts    # 主要的太阳系类（TypeScript）
-│   └── types/
-│       └── index.ts       # TypeScript 类型定义
-├── dist/                  # 编译后的 JavaScript 文件
-├── scripts/               # 跨平台启动脚本
-│   └── play.js           # Node.js 启动脚本
-├── index.html             # 主页面
-├── tsconfig.json          # TypeScript 配置
-├── package.json           # 项目依赖和脚本
-├── play.sh               # Unix/Linux 一键启动脚本
-├── play.bat              # Windows 一键启动脚本
-├── dev.sh                 # Unix/Linux 开发启动脚本
-└── dev.bat                # Windows 开发启动脚本
-```
+参见 CLAUDE.md 中所述。
 
 ## 🛠️ 技术栈
 

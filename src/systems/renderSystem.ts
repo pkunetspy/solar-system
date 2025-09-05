@@ -21,7 +21,7 @@ export class RenderSystem {
 
     constructor() {
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         
         this.initializeScene();
@@ -40,8 +40,8 @@ export class RenderSystem {
         // 设置场景背景
         this.scene.background = new THREE.Color(0x000011);
 
-        // 设置相机位置
-        this.camera.position.set(0, 20, 30);
+        // 设置相机位置 - 调整到更远的位置以便观察冥王星
+        this.camera.position.set(0, 50, 100);
 
         // 设置渲染器
         this.renderer.setSize(window.innerWidth, window.innerHeight);
