@@ -4,21 +4,43 @@
 
 ## 🚀 快速开始
 
-### macOS / Linux
+### 🎮 一键启动（推荐）
 
+#### macOS / Linux
+```bash
+# 一键启动（自动检测依赖、编译、启动服务器、打开浏览器）
+./play.sh
+```
+
+#### Windows
+```bash
+# 一键启动（双击运行或命令行）
+play.bat
+```
+
+#### 跨平台 npm 命令
+```bash
+# 使用 npm 一键启动
+npm run play
+# 或者使用 start 命令
+npm start
+```
+
+### 🛠️ 开发者模式
+
+#### macOS / Linux
 ```bash
 # 启动开发模式（自动编译 + 本地服务器）
 ./dev.sh
 ```
 
-### Windows
-
+#### Windows
 ```bash
 # 启动开发模式（自动编译 + 本地服务器）
 ./dev.bat
 ```
 
-### 手动构建（跨平台）
+### 📦 手动构建（跨平台）
 
 ```bash
 # 编译 TypeScript
@@ -28,7 +50,7 @@ npm run build
 npm run serve
 ```
 
-### 开发模式
+### 👀 监听模式
 
 ```bash
 # 监听文件变化并自动编译
@@ -44,9 +66,13 @@ SolarSystem/
 │   └── types/
 │       └── index.ts       # TypeScript 类型定义
 ├── dist/                  # 编译后的 JavaScript 文件
+├── scripts/               # 跨平台启动脚本
+│   └── play.js           # Node.js 启动脚本
 ├── index.html             # 主页面
 ├── tsconfig.json          # TypeScript 配置
 ├── package.json           # 项目依赖和脚本
+├── play.sh               # Unix/Linux 一键启动脚本
+├── play.bat              # Windows 一键启动脚本
 ├── dev.sh                 # Unix/Linux 开发启动脚本
 └── dev.bat                # Windows 开发启动脚本
 ```
@@ -138,6 +164,19 @@ SolarSystem/
 ## 🌌 坐标系统
 
 使用黄道坐标系进行天体位置计算，并转换到 Three.js 的右手坐标系用于渲染。
+
+## 🚀 用户使用说明
+
+### 💡 普通用户（推荐）
+1. **下载项目**
+2. **双击运行对应平台的启动文件**：
+   - macOS/Linux: 双击 `play.sh` 或在终端运行 `./play.sh`
+   - Windows: 双击 `play.bat`
+3. **等待自动完成**：脚本会自动检测环境、安装依赖、编译代码、启动服务器并打开浏览器
+4. **开始探索太阳系**！
+
+### 🔧 开发者使用
+使用 `dev.sh` / `dev.bat` 进行开发，或使用 `npm run dev` 进行文件监听模式开发。
 
 ## 📋 系统要求
 

@@ -7,7 +7,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "serve": "python3 -m http.server 8000",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "play": "node scripts/play.js",
+    "start": "npm run play"
   },
   "devDependencies": {
     "@types/three": "^0.152.1",
