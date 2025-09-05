@@ -117,6 +117,9 @@ export class SolarSystem {
             this.timeSystem.getTimeMode()
         );
 
+        // 更新行星距离显示
+        this.renderSystem.updatePlanetDistances(this.celestialObjects.planets);
+
         // 渲染场景
         this.renderSystem.render();
     }

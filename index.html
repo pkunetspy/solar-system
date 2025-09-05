@@ -34,7 +34,7 @@
         #controls-info {
             position: fixed;
             top: 20px;
-            right: 60px;
+            right: 20px;
             color: white;
             background: rgba(0, 0, 0, 0.7);
             padding: 15px;
@@ -59,7 +59,7 @@
         #time-controls {
             position: fixed;
             bottom: 20px;
-            right: 25px;
+            right: 20px;
             color: white;
             background: rgba(0, 0, 0, 0.7);
             padding: 15px;
@@ -95,10 +95,57 @@
             font-size: 12px;
             margin-top: 5px;
         }
+
+        #planet-distances {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.5;
+            z-index: 1000;
+            font-family: 'Courier New', monospace;
+            min-width: 280px;
+        }
+
+        #planet-distances h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .distance-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 2px 0;
+            gap: 15px;
+        }
+
+        .planet-name {
+            font-weight: bold;
+            min-width: 60px;
+            color: #999999;
+        }
+
+        .distance-value {
+            text-align: right;
+            font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+            font-weight: 300;
+            color: #999999;
+        }
     </style>
 </head>
 <body>
     <div id="canvas-container"></div>
+    <div id="planet-distances">
+        <h3>八大行星距离太阳中心</h3>
+        <div id="distances-list"></div>
+    </div>
     <div id="clock"></div>
     <div id="controls-info">
         <strong>控制说明：</strong><br>

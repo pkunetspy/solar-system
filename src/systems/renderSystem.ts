@@ -18,6 +18,7 @@ export class RenderSystem {
     public controls: OrbitControls;
     private labels: LabelData[] = [];
     private tempVector: THREE.Vector3 = new THREE.Vector3();
+    private distancesContainer: HTMLElement | null = null;
 
     constructor() {
         this.scene = new THREE.Scene();
@@ -29,6 +30,7 @@ export class RenderSystem {
         this.createStars();
         this.setupControls();
         this.setupResizeHandler();
+        this.initializeDistanceDisplay();
         
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     }
@@ -40,8 +42,8 @@ export class RenderSystem {
         // 设置场景背景
         this.scene.background = new THREE.Color(0x000011);
 
-        // 设置相机位置 - 调整到更远的位置以便观察冥王星
-        this.camera.position.set(0, 50, 100);
+        // 设置相机位置 - 调整到小行星带外围位置
+        this.camera.position.set(0, 15, 35);
 
         // 设置渲染器
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -200,5 +202,52 @@ export class RenderSystem {
      */
     getCamera(): THREE.PerspectiveCamera {
         return this.camera;
+    }
+
+    /**
+     * 初始化距离显示容器
+     */
+    private initializeDistanceDisplay(): void {
+        this.distancesContainer = document.getElementById('distances-list');
+    }
+
+    /**
+     * 更新行星距离显示
+     */
+    updatePlanetDistances(planets: THREE.Mesh[]): void {
+        if (!this.distancesContainer) return;
+
+        const sunPosition = new THREE.Vector3(0, 0, 0);
+        const planetsData: Array<{name: string, distance: number, color: string}> = [];
+
+        // 计算每个行星到太阳的距离
+        planets.forEach(planet => {
+            const planetData = planet.userData as CelestialBodyData;
+            // 跳过冥王星（不是八大行星）
+            if (planetData.name === '冥王星') return;
+
+            const distance = planet.position.distanceTo(sunPosition);
+            // 将距离从AU转换为km：1 AU = 149,597,870.7 km
+            // 由于使用了缩放因子，需要先转换回真实AU然后再转换为km
+            const realDistanceAU = distance / 10; // scaleFactors.distance = 10
+            const distanceKm = Math.round(realDistanceAU * 149597870.7);
+
+            planetsData.push({
+                name: planetData.name,
+                distance: distanceKm,
+                color: `#${planetData.color.toString(16).padStart(6, '0')}`
+            });
+        });
+
+        // 按距离排序
+        planetsData.sort((a, b) => a.distance - b.distance);
+
+        // 更新DOM
+        this.distancesContainer.innerHTML = planetsData.map(planet => 
+            `<div class="distance-item">
+                <span class="planet-name">${planet.name}</span>
+                <span class="distance-value">${planet.distance.toLocaleString()} km</span>
+            </div>`
+        ).join('');
     }
 }
