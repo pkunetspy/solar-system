@@ -94,6 +94,47 @@
         #time-info {
             font-size: 12px;
             margin-top: 5px;
+            color: #ccc;
+        }
+        
+        #time-scale-selector {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        #time-scale-selector label {
+            display: block;
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+        
+        .time-scale-options {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .time-scale-option {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+        
+        .time-scale-option:hover {
+            background: #555;
+        }
+        
+        .time-scale-option.active {
+            background: #ff6b35;
+        }
+        
+        .time-scale-option.active:hover {
+            background: #e55a2b;
         }
 
         #planet-distances {
@@ -243,6 +284,14 @@
     <div id="time-controls">
         <button id="time-mode-button">切换到运动模式</button>
         <div id="time-info">当前：静态模式</div>
+        <div id="time-scale-selector">
+            <label>时间加速选择：</label>
+            <div class="time-scale-options">
+                <button class="time-scale-option" data-scale="hour">1小时</button>
+                <button class="time-scale-option" data-scale="day">1天</button>
+                <button class="time-scale-option active" data-scale="week">1周</button>
+            </div>
+        </div>
     </div>
     
     <!-- 近景模式UI -->
