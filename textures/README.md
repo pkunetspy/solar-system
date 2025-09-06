@@ -6,12 +6,22 @@
 
 请将纹理文件放在此目录下，按以下命名规范：
 
+### 内太阳系
+- `sun_2k.jpg` - 太阳表面纹理 ✅ 已有
+- `mercury_2k.jpg` - 水星表面纹理 ✅ 已有
+- `venus_2k.jpg` - 金星表面纹理 ✅ 已有
 - `earth_2k.jpg` - 地球表面纹理（NASA Blue Marble数据）✅ 已有
-- `moon_2k.jpg` - 月球表面纹理  
-- `mars_2k.jpg` - 火星表面纹理
-- `venus_2k.jpg` - 金星表面纹理
-- `mercury_2k.jpg` - 水星表面纹理
-- `sun_2k.jpg` - 太阳表面纹理
+- `moon_2k.jpg` - 月球表面纹理 ✅ 已有
+- `mars_2k.jpg` - 火星表面纹理 ✅ 已有
+
+### 外太阳系
+- `jupiter_2k.jpg` - 木星表面纹理 ✅ 已有
+- `saturn_2k.jpg` - 土星表面纹理 ✅ 已有
+- `uranus_2k.jpg` - 天王星表面纹理 ✅ 已有
+- `neptune_2k.jpg` - 海王星表面纹理 ✅ 已有
+
+### 矮行星
+- `pluto_2k.jpg` - 冥王星表面纹理 ✅ 已有
 
 ## 推荐纹理来源
 

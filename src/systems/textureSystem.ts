@@ -28,7 +28,22 @@ export class TextureSystem {
         'mercury': 'textures/mercury_2k.jpg',
         
         // 太阳 - 2K分辨率
-        'sun': 'textures/sun_2k.jpg'
+        'sun': 'textures/sun_2k.jpg',
+        
+        // 木星 - 2K分辨率
+        'jupiter': 'textures/jupiter_2k.jpg',
+        
+        // 土星 - 2K分辨率
+        'saturn': 'textures/saturn_2k.jpg',
+        
+        // 天王星 - 2K分辨率
+        'uranus': 'textures/uranus_2k.jpg',
+        
+        // 海王星 - 2K分辨率
+        'neptune': 'textures/neptune_2k.jpg',
+        
+        // 冥王星 - 2K分辨率
+        'pluto': 'textures/pluto_2k.jpg'
     };
 
     /**
@@ -100,7 +115,12 @@ export class TextureSystem {
             '火星': 'mars',
             '金星': 'venus',
             '水星': 'mercury',
-            '太阳': 'sun'
+            '太阳': 'sun',
+            '木星': 'jupiter',
+            '土星': 'saturn',
+            '天王星': 'uranus',
+            '海王星': 'neptune',
+            '冥王星': 'pluto'
         };
         
         const mappedName = nameMapping[name] || name;
@@ -130,19 +150,30 @@ export class TextureSystem {
     /**
      * 创建带纹理的材质（改进光照效果）
      */
-    createTexturedMaterial(texture: THREE.Texture, originalMaterial: THREE.Material, celestialName?: string): THREE.MeshLambertMaterial {
+    createTexturedMaterial(texture: THREE.Texture, originalMaterial: THREE.Material, celestialName?: string): THREE.Material {
+        // 太阳特殊处理：使用不受光照影响的材质
+        if (celestialName === '太阳') {
+            const material = new THREE.MeshBasicMaterial({
+                map: texture
+            });
+            // 太阳本身就是光源，不需要额外光照，纹理本身就足够亮
+            return material;
+        }
+        
+        // 其他天体使用受光照影响的材质
         const material = new THREE.MeshLambertMaterial({
             map: texture
         });
         
-        // 月球特殊处理：降低光照强度，避免过曝
+        // 根据天体类型调整光照效果
         if (celestialName === '月球') {
-            // 使用更柔和的光照响应
+            // 月球特殊处理：降低光照强度，避免过曝
             material.color.setHex(0x888888); // 设置为灰色调，降低整体亮度
             material.emissive.setHex(0x111111); // 添加少量自发光，增强暗部细节
         } else {
-            // 其他天体：增加轻微自发光以增强背光面可见性
-            material.emissive.setHex(0x0a0a0a); // 轻微自发光，增强纹理在暗面的可见性
+            // 其他行星：统一降低光照响应，避免朝阳面过曝
+            material.color.setHex(0x999999); // 降低到60%亮度，防止过曝
+            material.emissive.setHex(0x1a1a1a); // 适量增加自发光，保持暗面可见性
         }
         
         // 如果原材质有特殊属性，保留它们

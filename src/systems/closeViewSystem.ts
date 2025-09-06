@@ -700,6 +700,8 @@ export class CloseViewSystem {
             highResSegments = 256; // 太阳使用超超高分辨率
         } else if (targetName === '地球') {
             highResSegments = 192; // 地球使用极高分辨率以配合2K纹理
+        } else if (targetName === '木星' || targetName === '土星') {
+            highResSegments = 192; // 巨行星使用极高分辨率以展示大气细节
         } else if (targetName === '月球') {
             highResSegments = 128; // 月球使用高分辨率，保持原有尺寸
         } else {
@@ -915,10 +917,12 @@ export class CloseViewSystem {
         
         if (celestialName === '地球') {
             highResSegments = 192; // 地球使用极高分辨率以配合2K纹理
+        } else if (celestialName === '木星' || celestialName === '土星') {
+            highResSegments = 192; // 巨行星使用极高分辨率以展示大气细节
         } else if (celestialName === '月球') {
             highResSegments = 128; // 月球使用高分辨率
         } else {
-            highResSegments = 64;  // 其他天体默认分辨率
+            highResSegments = 128;  // 其他天体使用高分辨率
         }
         
         // 获取原始半径
