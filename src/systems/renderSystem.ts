@@ -83,8 +83,8 @@ export class RenderSystem {
         sunLight.position.set(0, 0, 0);
         this.scene.add(sunLight);
 
-        // 环境光（微弱）
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.1);
+        // 增强环境光，让背光面也能看到纹理细节
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
         this.scene.add(ambientLight);
     }
 

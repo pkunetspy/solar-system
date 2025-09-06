@@ -7,7 +7,7 @@ import { TimeMode } from '../types/index.js';
 export class TimeSystem {
     private timeMode: TimeMode = 'static';
     private simulationStartTime: number = Date.now();
-    private readonly animationTimeScale: number = 7 * 24 * 60 * 60 * 1000; // 一秒真实时间 = 一周模拟时间
+    private readonly animationTimeScale: number = 60 * 60 * 1000; // 一秒真实时间 = 1小时模拟时间
     private isPaused: boolean = false;
     private pausedTime: number = 0;
 
@@ -116,12 +116,14 @@ export class TimeSystem {
             });
             clockElement.textContent = timeString;
         } else {
-            // 动画模式：只显示日期，不显示秒
+            // 动画模式：显示日期和小时，便于观察自转
             displayTime = new Date(this.getSimulationTime());
             const timeString = displayTime.toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
                 hour12: false
             });
             clockElement.textContent = timeString;
@@ -157,7 +159,7 @@ export class TimeSystem {
         } else {
             button.textContent = '切换到静态模式';
             button.className = 'animation-mode';
-            info.textContent = '当前：运动模式（1秒 = 1周）';
+            info.textContent = '当前：运动模式（1秒 = 1小时）';
         }
     }
 

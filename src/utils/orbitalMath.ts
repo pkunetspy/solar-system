@@ -99,7 +99,7 @@ export class OrbitalMath {
         const daysSinceJ2000 = (time - J2000_EPOCH) / (1000 * 60 * 60 * 24);
 
         // 月球相对于地球的轨道计算
-        const moonDistance = (moonData.semiMajorAxis || 0) * scaleFactors.distance * 30;
+        const moonDistance = (moonData.semiMajorAxis || 0) * scaleFactors.distance * 45; // 与celestialObjects.ts中保持一致
         const eccentricity = moonData.eccentricity || 0;
         const inclination = (moonData.inclination || 0) * Math.PI / 180;
         const meanLongitudeAtEpoch = (moonData.meanLongitude || 0) * Math.PI / 180;

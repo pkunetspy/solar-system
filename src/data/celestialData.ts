@@ -15,7 +15,8 @@ export const celestialData: CelestialDataCollection = {
         distance: 0,
         orbitalPeriod: 0,
         rotationPeriod: 25.4,
-        eccentricity: 0
+        eccentricity: 0,
+        axialTilt: 7.25 // 相对黄道面的倾斜角（度）
     },
     mercury: {
         name: '水星',
@@ -28,7 +29,8 @@ export const celestialData: CelestialDataCollection = {
         longitudePerihelion: 77.45779628,
         longitudeNode: 48.33076593,
         orbitalPeriod: 87.9691,
-        rotationPeriod: 58.6462
+        rotationPeriod: 58.6462,
+        axialTilt: 0.034 // 几乎没有倾斜
     },
     venus: {
         name: '金星',
@@ -41,7 +43,8 @@ export const celestialData: CelestialDataCollection = {
         longitudePerihelion: 131.60246718,
         longitudeNode: 76.67984255,
         orbitalPeriod: 224.7008,
-        rotationPeriod: -243.0226
+        rotationPeriod: -243.0226,
+        axialTilt: 177.4 // 逆向自转，几乎倒立
     },
     earth: {
         name: '地球',
@@ -54,7 +57,8 @@ export const celestialData: CelestialDataCollection = {
         longitudePerihelion: 102.93768193,
         longitudeNode: 0.0,
         orbitalPeriod: 365.25636,
-        rotationPeriod: 1.0
+        rotationPeriod: 1.0,
+        axialTilt: 23.44 // 地球的黄赤交角
     },
     moon: {
         name: '月球',
@@ -67,7 +71,9 @@ export const celestialData: CelestialDataCollection = {
         longitudePerihelion: 83.3532465,
         longitudeNode: 125.1228870,
         orbitalPeriod: 27.321661,
-        rotationPeriod: 27.321661
+        rotationPeriod: 27.321661,
+        axialTilt: 6.68, // 相对地球轨道平面
+        scaleFactor: 1.8 // 轻微增大可见性，但保持相对地球的合理比例
     },
     mars: {
         name: '火星',
@@ -80,7 +86,8 @@ export const celestialData: CelestialDataCollection = {
         longitudePerihelion: -23.94362959,
         longitudeNode: 49.55953891,
         orbitalPeriod: 686.971,
-        rotationPeriod: 1.025957
+        rotationPeriod: 1.025957,
+        axialTilt: 25.19 // 与地球相似的季节变化
     },
     jupiter: {
         name: '木星',
@@ -94,7 +101,8 @@ export const celestialData: CelestialDataCollection = {
         longitudeNode: 100.47390909,
         orbitalPeriod: 4332.59,
         rotationPeriod: 0.41354,
-        scaleFactor: 0.3
+        scaleFactor: 0.3,
+        axialTilt: 3.13 // 轻微倾斜
     },
     saturn: {
         name: '土星',
@@ -108,7 +116,8 @@ export const celestialData: CelestialDataCollection = {
         longitudeNode: 113.66242448,
         orbitalPeriod: 10759.22,
         rotationPeriod: 0.44401,
-        scaleFactor: 0.35
+        scaleFactor: 0.35,
+        axialTilt: 26.73 // 明显的季节变化
     },
     uranus: {
         name: '天王星',
@@ -122,7 +131,8 @@ export const celestialData: CelestialDataCollection = {
         longitudeNode: 74.01692503,
         orbitalPeriod: 30688.5,
         rotationPeriod: -0.71833,
-        scaleFactor: 0.5
+        scaleFactor: 0.5,
+        axialTilt: 97.77 // 几乎“躺着”运行
     },
     neptune: {
         name: '海王星',
@@ -136,7 +146,8 @@ export const celestialData: CelestialDataCollection = {
         longitudeNode: 131.78422574,
         orbitalPeriod: 60182,
         rotationPeriod: 0.6713,
-        scaleFactor: 0.5
+        scaleFactor: 0.5,
+        axialTilt: 28.32 // 强烈的季节变化
     },
     pluto: {
         name: '冥王星',
@@ -150,7 +161,8 @@ export const celestialData: CelestialDataCollection = {
         longitudeNode: 110.30393684,
         orbitalPeriod: 90560,
         rotationPeriod: 6.387230,
-        scaleFactor: 5.0
+        scaleFactor: 5.0,
+        axialTilt: 122.53 // 逆向自转，强烈倾斜
     }
 };
 

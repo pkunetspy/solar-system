@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { RenderSystem } from './renderSystem.js';
 import { CelestialObjects } from '../objects/celestialObjects.js';
+import { TimeSystem } from './timeSystem.js';
+import { TextureSystem } from './textureSystem.js';
 
 /**
  * 天体近景浏览系统
@@ -30,10 +32,16 @@ export class CloseViewSystem {
     private lastMouseY: number = 0;
     private spherical: THREE.Spherical = new THREE.Spherical();
     private customCameraDistance: number = 0;
+    // 纹理系统
+    private textureSystem: TextureSystem = new TextureSystem();
+    
+    // 原始太阳尺度备份
+    private originalSunScale: THREE.Vector3 | null = null;
 
     constructor(
         private renderSystem: RenderSystem,
-        private celestialObjects: CelestialObjects
+        private celestialObjects: CelestialObjects,
+        private timeSystem: TimeSystem
     ) {
         this.setupEventListeners();
         this.initializeUIElements();
@@ -181,11 +189,22 @@ export class CloseViewSystem {
      */
     private calculateCloseViewPosition(target: THREE.Mesh): THREE.Vector3 {
         const targetData = target.userData;
+        const celestialName = targetData['name'];
         let actualRadius: number;
         
         // 特殊处理太阳
-        if (targetData['name'] === '太阳') {
+        if (celestialName === '太阳') {
             actualRadius = targetData['radius'] * 0.015; // 使用sunSize缩放因子
+        } else if (celestialName === '月球') {
+            // 月球特殊处理：使用实际几何体的半径
+            const geometry = target.geometry;
+            if (geometry.boundingSphere) {
+                actualRadius = geometry.boundingSphere.radius;
+            } else {
+                geometry.computeBoundingSphere();
+                actualRadius = geometry.boundingSphere!.radius;
+            }
+            console.log(`月球实际几何体半径: ${actualRadius.toFixed(4)}`);
         } else {
             const baseRadius = targetData['radius'] || 1;
             const scaleFactor = targetData['scaleFactor'] || 1;
@@ -219,7 +238,7 @@ export class CloseViewSystem {
             direction.multiplyScalar(actualRadius + targetDistance)
         );
         
-        console.log(`Close view for ${targetData['name']}: radius=${actualRadius}, distance=${targetDistance}, direction=${direction.x.toFixed(2)},${direction.y.toFixed(2)},${direction.z.toFixed(2)}`);
+        console.log(`Close view for ${celestialName}: radius=${actualRadius.toFixed(4)}, distance=${targetDistance.toFixed(4)}, direction=${direction.x.toFixed(2)},${direction.y.toFixed(2)},${direction.z.toFixed(2)}`);
         
         return cameraPosition;
     }
@@ -237,7 +256,7 @@ export class CloseViewSystem {
         const duration = 2000; // 2秒动画
         const startTime = Date.now();
         
-        const animate = () => {
+        const animate = async () => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
@@ -261,8 +280,8 @@ export class CloseViewSystem {
                 this.isCloseViewMode = true;
                 this.animating = false;
                 
-                // 切换到近景模式材质（无光照影响）
-                this.switchToCloseViewMaterial(this.currentTarget!);
+                // 切换到近景模式材质（无光照影响，支持纹理）
+                await this.switchToCloseViewMaterial(this.currentTarget!);
                 
                 // 提升几何体分辨率以获得平滑表面
                 this.upgradeGeometryResolution(this.currentTarget!);
@@ -334,7 +353,16 @@ export class CloseViewSystem {
                 if (this.currentTarget) {
                     this.restoreOriginalMaterial(this.currentTarget);
                     this.restoreOriginalGeometry(this.currentTarget);
+                    
+                    // 如果是地月系统，恢复月球轨道距离
+                    const targetName = this.currentTarget.userData?.['name'];
+                    if (targetName === '地球' || targetName === '月球') {
+                        this.restoreEarthMoonSystemScale();
+                    }
                 }
+                
+                // 恢复太阳的原始尺度
+                this.restoreSunScale();
                 
                 // 重置状态
                 this.isCloseViewMode = false;
@@ -355,6 +383,14 @@ export class CloseViewSystem {
     update(): void {
         // 如果在近景模式且有目标
         if (this.isCloseViewMode && this.currentTarget && !this.animating) {
+            // 持续应用真实自转（每帧更新），传递模拟时间
+            const celestialName = this.currentTarget.userData?.['name'];
+            if (celestialName) {
+                const isEarthMoonSystem = (celestialName === '地球' || celestialName === '月球');
+                const simulationTime = this.timeSystem.getSimulationTime();
+                this.textureSystem.applyRealisticRotation(this.currentTarget, isEarthMoonSystem, simulationTime);
+            }
+            
             if (this.customCameraControl) {
                 // 自定义相机控制模式：让相机跟随天体运动但保持相对位置
                 this.updateCustomCameraPosition();
@@ -428,9 +464,9 @@ export class CloseViewSystem {
     }
 
     /**
-     * 切换到近景模式材质（无光照影响）
+     * 切换到近景模式材质（无光照影响，支持纹理）
      */
-    private switchToCloseViewMaterial(target: THREE.Mesh): void {
+    private async switchToCloseViewMaterial(target: THREE.Mesh): Promise<void> {
         const originalMaterial = target.material as THREE.Material;
         
         // 保存原始材质
@@ -438,7 +474,47 @@ export class CloseViewSystem {
             target.userData['originalMaterial'] = originalMaterial;
         }
         
-        // 创建无光照材质
+        const celestialName = target.userData?.['name'];
+        
+        // 检查是否有纹理可用
+        if (this.textureSystem.hasTexture(celestialName)) {
+            try {
+                // 异步加载纹理
+                console.log(`Loading texture for ${celestialName}...`);
+                const texture = await this.textureSystem.loadTexture(celestialName);
+                
+                // 创建带纹理的材质
+                const texturedMaterial = this.textureSystem.createTexturedMaterial(texture, originalMaterial, celestialName);
+                target.material = texturedMaterial;
+                
+                // 应用真实的自转（包括轴倾角）
+                const isEarthMoonSystem = (celestialName === '地球' || celestialName === '月球');
+                const simulationTime = this.timeSystem.getSimulationTime();
+                this.textureSystem.applyRealisticRotation(target, isEarthMoonSystem, simulationTime);
+                
+                // 地月系统特殊处理：调整太阳大小以符合真实视觉比例
+                if (isEarthMoonSystem) {
+                    this.adjustSunScaleForEarthMoonSystem();
+                    // 同时为地月系统的另一个天体加载纹理
+                    await this.loadEarthMoonSystemTextures(celestialName);
+                }
+                
+                console.log(`Applied texture to ${celestialName}`);
+            } catch (error) {
+                console.warn(`Failed to load texture for ${celestialName}, using fallback material:`, error);
+                this.createFallbackMaterial(target, originalMaterial);
+            }
+        } else {
+            // 没有纹理，使用无光照材质作为后备
+            console.log(`No texture available for ${celestialName}, using basic material`);
+            this.createFallbackMaterial(target, originalMaterial);
+        }
+    }
+    
+    /**
+     * 创建后备材质（无纹理的基础材质）
+     */
+    private createFallbackMaterial(target: THREE.Mesh, originalMaterial: THREE.Material): void {
         if (originalMaterial instanceof THREE.MeshLambertMaterial) {
             const closeViewMaterial = new THREE.MeshBasicMaterial({
                 color: originalMaterial.color,
@@ -447,6 +523,19 @@ export class CloseViewSystem {
             });
             target.material = closeViewMaterial;
         }
+        
+        // 即使没有纹理，也应用真实的自转（在近景模式下很重要）
+        const celestialName = target.userData?.['name'];
+        const isEarthMoonSystem = (celestialName === '地球' || celestialName === '月球');
+        const simulationTime = this.timeSystem.getSimulationTime();
+        this.textureSystem.applyRealisticRotation(target, isEarthMoonSystem, simulationTime);
+        
+        // 地月系统特殊处理：调整太阳大小以符合真实视觉比例
+        if (isEarthMoonSystem) {
+            this.adjustSunScaleForEarthMoonSystem();
+            // 同时为地月系统的另一个天体加载纹理
+            this.loadEarthMoonSystemTextures(celestialName);
+        }
     }
 
     /**
@@ -454,9 +543,22 @@ export class CloseViewSystem {
      */
     private restoreOriginalMaterial(target: THREE.Mesh): void {
         if (target.userData['originalMaterial']) {
+            // 如果当前材质是纹理材质，先释放资源
+            const currentMaterial = target.material as THREE.Material;
+            if (currentMaterial !== target.userData['originalMaterial']) {
+                currentMaterial.dispose();
+            }
+            
             target.material = target.userData['originalMaterial'];
             delete target.userData['originalMaterial'];
         }
+    }
+    
+    /**
+     * 清理纹理系统资源
+     */
+    dispose(): void {
+        this.textureSystem.dispose();
     }
 
     /**
@@ -595,9 +697,13 @@ export class CloseViewSystem {
         const targetName = target.userData?.['name'];
         
         if (targetName === '太阳') {
-            highResSegments = 128; // 太阳使用超高分辨率
+            highResSegments = 256; // 太阳使用超超高分辨率
+        } else if (targetName === '地球') {
+            highResSegments = 192; // 地球使用极高分辨率以配合2K纹理
+        } else if (targetName === '月球') {
+            highResSegments = 128; // 月球使用高分辨率，保持原有尺寸
         } else {
-            highResSegments = 64;  // 行星和月球使用高分辨率
+            highResSegments = 128;  // 其他天体使用超高分辨率
         }
         
         // 获取原始半径
@@ -627,6 +733,11 @@ export class CloseViewSystem {
             // 恢复原始几何体
             target.geometry = target.userData['originalGeometry'];
             delete target.userData['originalGeometry'];
+            
+            // 清除真实尺度标记
+            if (target.userData['realScaleApplied']) {
+                delete target.userData['realScaleApplied'];
+            }
             
             console.log(`Restored ${target.userData?.['name']} to original geometry resolution`);
         }
@@ -665,5 +776,187 @@ export class CloseViewSystem {
                 }, 500);
             }
         }, 5000);
+    }
+
+    /**
+     * 为地月系统调整太阳大小（真实视觉比例）
+     */
+    private adjustSunScaleForEarthMoonSystem(): void {
+        if (!this.celestialObjects.sun) return;
+
+        // 备份原始太阳尺度（仅第一次）
+        if (!this.originalSunScale) {
+            this.originalSunScale = this.celestialObjects.sun.scale.clone();
+        }
+
+        // 真实太阳视角大小计算
+        // 从地球看太阳的视角直径约为0.5度
+        // 而月球的视角直径也约为0.5度（这就是日食能完美遮挡太阳的原因）
+        
+        const earthMesh = this.celestialObjects.planets.find(p => p.userData['name'] === '地球');
+        if (!earthMesh) return;
+
+        const earthRadius = earthMesh.geometry.boundingSphere?.radius || 0.5;
+        const sunDistance = this.celestialObjects.sun.position.distanceTo(earthMesh.position);
+        
+        // 计算太阳应该有的视角大小（基于地球参考）
+        // 真实数据：太阳半径约是地球半径的109倍，但距离约是地球轨道半径的1倍
+        // 视角大小 = 2 * atan(半径 / 距离)
+        const realSunAngularSize = 2 * Math.atan(696000 / 149597870); // 约0.53度
+        const expectedSunRadius = sunDistance * Math.tan(realSunAngularSize / 2);
+        
+        // 计算缩放因子
+        const currentSunRadius = this.celestialObjects.sun.geometry.boundingSphere?.radius || 1;
+        const scaleFactor = expectedSunRadius / currentSunRadius;
+        
+        // 应用缩放（但不要太小，保持一定的可见性）
+        const minScaleFactor = 0.1; // 最小缩放因子，确保太阳仍然可见
+        const finalScaleFactor = Math.max(scaleFactor, minScaleFactor);
+        
+        this.celestialObjects.sun.scale.setScalar(finalScaleFactor);
+        
+        console.log(`地月系统模式: 太阳视觉缩放调整到 ${finalScaleFactor.toFixed(3)}倍 (真实视角比例)`);
+    }
+
+    /**
+     * 恢复太阳的原始尺度
+     */
+    private restoreSunScale(): void {
+        if (this.celestialObjects.sun && this.originalSunScale) {
+            this.celestialObjects.sun.scale.copy(this.originalSunScale);
+            this.originalSunScale = null;
+            console.log('太阳尺度已恢复到原始状态');
+        }
+    }
+
+    /**
+     * 为地月系统加载纹理（同时加载地球和月球纹理）
+     */
+    private async loadEarthMoonSystemTextures(currentCelestialName: string): Promise<void> {
+        try {
+            // 获取地球和月球的mesh对象
+            const earthMesh = this.celestialObjects.planets.find(p => p.userData['name'] === '地球');
+            const moonMesh = this.celestialObjects.moon;
+            
+            if (!earthMesh || !moonMesh) {
+                console.warn('无法找到地球或月球对象，跳过地月系统纹理加载');
+                return;
+            }
+            
+            // 如果当前观察的是地球，为月球加载纹理
+            if (currentCelestialName === '地球' && moonMesh) {
+                await this.loadTextureForCelestialBody(moonMesh, '月球');
+            }
+            
+            // 如果当前观察的是月球，为地球加载纹理
+            if (currentCelestialName === '月球' && earthMesh) {
+                await this.loadTextureForCelestialBody(earthMesh, '地球');
+            }
+            
+            console.log(`地月系统纹理加载完成，当前观察: ${currentCelestialName}`);
+        } catch (error) {
+            console.error('地月系统纹理加载失败:', error);
+        }
+    }
+
+    /**
+     * 为指定天体加载纹理（辅助方法）
+     */
+    private async loadTextureForCelestialBody(celestialMesh: THREE.Mesh, celestialName: string): Promise<void> {
+        // 检查是否已经有纹理
+        const currentMaterial = celestialMesh.material as THREE.Material;
+        if (currentMaterial instanceof THREE.MeshLambertMaterial && currentMaterial.map) {
+            console.log(`${celestialName} 已经有纹理，跳过加载`);
+            return;
+        }
+        
+        // 保存原始材质
+        if (!celestialMesh.userData['originalMaterial']) {
+            celestialMesh.userData['originalMaterial'] = currentMaterial;
+        }
+        
+        // 检查是否有纹理可用
+        if (this.textureSystem.hasTexture(celestialName)) {
+            try {
+                console.log(`为 ${celestialName} 加载纹理...`);
+                const texture = await this.textureSystem.loadTexture(celestialName);
+                
+                // 创建带纹理的材质
+                const texturedMaterial = this.textureSystem.createTexturedMaterial(texture, currentMaterial, celestialName);
+                celestialMesh.material = texturedMaterial;
+                
+                // 应用真实自转
+                const simulationTime = this.timeSystem.getSimulationTime();
+                this.textureSystem.applyRealisticRotation(celestialMesh, true, simulationTime);
+                
+                // 提升几何体分辨率
+                this.upgradeGeometryForCelestialBody(celestialMesh, celestialName);
+                
+                console.log(`${celestialName} 纹理加载并应用成功`);
+            } catch (error) {
+                console.warn(`${celestialName} 纹理加载失败:`, error);
+            }
+        }
+    }
+
+    /**
+     * 为指定天体提升几何体分辨率（辅助方法）
+     */
+    private upgradeGeometryForCelestialBody(celestialMesh: THREE.Mesh, celestialName: string): void {
+        const geometry = celestialMesh.geometry;
+        
+        // 保存原始几何体
+        if (!celestialMesh.userData['originalGeometry']) {
+            celestialMesh.userData['originalGeometry'] = geometry;
+        }
+        
+        // 计算高分辨率几何体参数
+        let highResSegments: number;
+        
+        if (celestialName === '地球') {
+            highResSegments = 192; // 地球使用极高分辨率以配合2K纹理
+        } else if (celestialName === '月球') {
+            highResSegments = 128; // 月球使用高分辨率
+        } else {
+            highResSegments = 64;  // 其他天体默认分辨率
+        }
+        
+        // 获取原始半径
+        const boundingSphere = geometry.boundingSphere;
+        if (!boundingSphere) {
+            geometry.computeBoundingSphere();
+        }
+        const radius = geometry.boundingSphere!.radius;
+        
+        // 创建高分辨率几何体
+        const highResGeometry = new THREE.SphereGeometry(radius, highResSegments, highResSegments);
+        
+        // 替换几何体
+        celestialMesh.geometry = highResGeometry;
+        
+        console.log(`${celestialName} 几何体分辨率提升到 ${highResSegments}x${highResSegments}`);
+    }
+
+    /**
+     * 恢复地月系统的模拟尺度
+     */
+    private restoreEarthMoonSystemScale(): void {
+        // 获取地球和月球的mesh对象
+        const earthMesh = this.celestialObjects.planets.find(p => p.userData['name'] === '地球');
+        const moonMesh = this.celestialObjects.moon;
+        
+        // 恢复地球的几何体和材质（如果有调整）
+        if (earthMesh) {
+            this.restoreOriginalMaterial(earthMesh);
+            this.restoreOriginalGeometry(earthMesh);
+        }
+        
+        // 恢复月球的几何体和材质（如果有调整）
+        if (moonMesh) {
+            this.restoreOriginalMaterial(moonMesh);
+            this.restoreOriginalGeometry(moonMesh);
+        }
+        
+        console.log('地月系统尺度恢复：所有天体的几何体和材质已恢复');
     }
 }

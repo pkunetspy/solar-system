@@ -77,8 +77,9 @@ export class CelestialObjects {
     private createMoon(): void {
         const moonData = celestialData.moon;
 
-        // 月球的半径
-        const radius = moonData.radius * scaleFactors.planetSize;
+        // 月球的半径，应用尺寸调整因子
+        const sizeAdjustment = moonData.scaleFactor || 1;
+        const radius = moonData.radius * scaleFactors.planetSize * sizeAdjustment;
 
         const geometry = new THREE.SphereGeometry(radius, 16, 16); // 默认分辨率，近景模式下会动态提升
         const material = new THREE.MeshLambertMaterial({ color: moonData.color });
@@ -88,7 +89,7 @@ export class CelestialObjects {
 
         // 初始位置设置在地球附近
         const earthDistance = (celestialData.earth.semiMajorAxis || 0) * scaleFactors.distance;
-        const moonDistance = (moonData.semiMajorAxis || 0) * scaleFactors.distance * 30; // 放大月球轨道以便观察
+        const moonDistance = (moonData.semiMajorAxis || 0) * scaleFactors.distance * 45; // 调整为45倍，增加地月距离的可见性
         this.moon.position.set(earthDistance + moonDistance, 0, 0);
 
         this.renderSystem.addToScene(this.moon);

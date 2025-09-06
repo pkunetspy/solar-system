@@ -32,7 +32,7 @@ export class SolarSystem {
         this.timeSystem = new TimeSystem();
         this.celestialObjects = new CelestialObjects(this.renderSystem);
         this.sunEffects = new SunEffects(this.renderSystem);
-        this.closeViewSystem = new CloseViewSystem(this.renderSystem, this.celestialObjects);
+        this.closeViewSystem = new CloseViewSystem(this.renderSystem, this.celestialObjects, this.timeSystem);
 
         // 添加太阳光晕效果
         if (this.celestialObjects.sun) {
@@ -61,8 +61,11 @@ export class SolarSystem {
             const newPosition = OrbitalMath.calculatePlanetPosition(planetData, currentTime);
             planet.position.copy(newPosition);
 
-            // 更新自转
-            planet.rotation.y = OrbitalMath.calculateRotationAngle(planetData, currentTime);
+            // 更新自转 - 但在近景模式下不覆盖纹理系统的旋转设置
+            if (!this.closeViewSystem.isInCloseViewMode()) {
+                planet.rotation.y = OrbitalMath.calculateRotationAngle(planetData, currentTime);
+            }
+            // 注意：近景模式下，旋转由 textureSystem.applyRealisticRotation() 控制
         });
     }
 
@@ -85,8 +88,10 @@ export class SolarSystem {
         );
         this.celestialObjects.moon.position.copy(newPosition);
 
-        // 月球自转（同步自转）
-        this.celestialObjects.moon.rotation.y = OrbitalMath.calculateRotationAngle(moonData, currentTime);
+        // 月球自转（同步自转）- 但在近景模式下不覆盖纹理系统的设置
+        if (!this.closeViewSystem.isInCloseViewMode()) {
+            this.celestialObjects.moon.rotation.y = OrbitalMath.calculateRotationAngle(moonData, currentTime);
+        }
     }
 
     /**
@@ -95,9 +100,12 @@ export class SolarSystem {
     private updateSun(currentTime: number): void {
         if (!this.celestialObjects.sun) return;
 
-        const daysSinceEpoch = currentTime / (1000 * 60 * 60 * 24);
-        this.celestialObjects.sun.rotation.y = 
-            (daysSinceEpoch / celestialData.sun.rotationPeriod) * 2 * Math.PI;
+        // 太阳自转 - 但在近景模式下不覆盖纹理系统的设置
+        if (!this.closeViewSystem.isInCloseViewMode()) {
+            const daysSinceEpoch = currentTime / (1000 * 60 * 60 * 24);
+            this.celestialObjects.sun.rotation.y = 
+                (daysSinceEpoch / celestialData.sun.rotationPeriod) * 2 * Math.PI;
+        }
     }
 
     /**

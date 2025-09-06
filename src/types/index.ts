@@ -14,6 +14,7 @@ export interface CelestialBodyData {
     rotationPeriod: number;
     distance?: number;
     scaleFactor?: number;
+    axialTilt?: number; // 自转轴倾斜角（度）
 }
 
 export interface CelestialDataCollection {
