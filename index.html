@@ -138,6 +138,93 @@
             font-weight: 300;
             color: #999999;
         }
+
+        #close-view-ui {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            text-align: center;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #close-view-ui h2 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
+            color: #4CAF50;
+        }
+
+        #close-view-ui .exit-hint {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #cccccc;
+            font-style: italic;
+        }
+
+        #click-hint {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+
+        #toast-notification {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            z-index: 3000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
+            text-align: center;
+            line-height: 1.4;
+            opacity: 0;
+            visibility: hidden;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        #toast-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #toast-notification .toast-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        #toast-notification .toast-title .celestial-name {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        #toast-notification .toast-subtitle {
+            font-size: 13px;
+            color: #cccccc;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -156,6 +243,22 @@
     <div id="time-controls">
         <button id="time-mode-button">切换到运动模式</button>
         <div id="time-info">当前：静态模式</div>
+    </div>
+    
+    <!-- 近景模式UI -->
+    <div id="close-view-ui">
+        <h2 id="target-name">天体名称</h2>
+        <div>正在观察天体表面</div>
+        <div class="exit-hint">按 ESC 键退出近景浏览</div>
+    </div>
+    
+    <!-- 点击提示 -->
+    <div id="click-hint">点击任意天体进入近景浏览</div>
+    
+    <!-- Toast 通知 -->
+    <div id="toast-notification">
+        <div class="toast-title" id="toast-title"></div>
+        <div class="toast-subtitle" id="toast-subtitle">按 ESC 退出近景浏览</div>
     </div>
     
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>

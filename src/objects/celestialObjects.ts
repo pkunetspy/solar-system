@@ -28,7 +28,7 @@ export class CelestialObjects {
      */
     private createSun(): void {
         const sunRadius = celestialData.sun.radius * scaleFactors.sunSize;
-        const geometry = new THREE.SphereGeometry(sunRadius, 32, 32);
+        const geometry = new THREE.SphereGeometry(sunRadius, 32, 32); // 默认分辨率，近景模式下会动态提升
 
         // 创建太阳材质（发光效果）
         const material = new THREE.MeshBasicMaterial({
@@ -56,7 +56,7 @@ export class CelestialObjects {
             const sizeAdjustment = data.scaleFactor || 1;
             const radius = data.radius * scaleFactors.planetSize * sizeAdjustment;
 
-            const geometry = new THREE.SphereGeometry(radius, 16, 16);
+            const geometry = new THREE.SphereGeometry(radius, 16, 16); // 默认分辨率，近景模式下会动态提升
             const material = new THREE.MeshLambertMaterial({ color: data.color });
 
             const planet = new THREE.Mesh(geometry, material);
@@ -80,7 +80,7 @@ export class CelestialObjects {
         // 月球的半径
         const radius = moonData.radius * scaleFactors.planetSize;
 
-        const geometry = new THREE.SphereGeometry(radius, 16, 16);
+        const geometry = new THREE.SphereGeometry(radius, 16, 16); // 默认分辨率，近景模式下会动态提升
         const material = new THREE.MeshLambertMaterial({ color: moonData.color });
 
         this.moon = new THREE.Mesh(geometry, material);

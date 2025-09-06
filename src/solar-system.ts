@@ -6,6 +6,7 @@ import { TimeSystem } from './systems/timeSystem.js';
 import { RenderSystem } from './systems/renderSystem.js';
 import { CelestialObjects } from './objects/celestialObjects.js';
 import { SunEffects } from './effects/sunEffects.js';
+import { CloseViewSystem } from './systems/closeViewSystem.js';
 
 /**
  * 太阳系3D可视化主类
@@ -16,6 +17,7 @@ export class SolarSystem {
     private timeSystem!: TimeSystem;
     private celestialObjects!: CelestialObjects;
     private sunEffects!: SunEffects;
+    private closeViewSystem!: CloseViewSystem;
 
     constructor() {
         this.init();
@@ -30,6 +32,7 @@ export class SolarSystem {
         this.timeSystem = new TimeSystem();
         this.celestialObjects = new CelestialObjects(this.renderSystem);
         this.sunEffects = new SunEffects(this.renderSystem);
+        this.closeViewSystem = new CloseViewSystem(this.renderSystem, this.celestialObjects);
 
         // 添加太阳光晕效果
         if (this.celestialObjects.sun) {
@@ -119,6 +122,9 @@ export class SolarSystem {
 
         // 更新行星距离显示
         this.renderSystem.updatePlanetDistances(this.celestialObjects.planets);
+
+        // 更新近景浏览系统
+        this.closeViewSystem.update();
 
         // 渲染场景
         this.renderSystem.render();
