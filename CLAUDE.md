@@ -42,34 +42,35 @@ npm run restart     # 重启服务器（杀掉旧进程并启动新的）
 
 ## 项目结构
 
-### 模块化架构
+### 重构后的模块化架构
 ```
 SolarSystem/
 ├── src/
-│   ├── solar-system.ts         # 主协调类
+│   ├── solar-system.ts       # 主协调类 (127行)
 │   ├── data/
-│   │   └── celestialData.ts    # 天体数据和配置
+│   │   └── celestialData.ts  # 天体数据和配置
 │   ├── utils/
-│   │   └── orbitalMath.ts      # 轨道计算工具
+│   │   └── orbitalMath.ts    # 轨道计算工具
 │   ├── systems/
-│   │   ├── timeSystem.ts       # 时间系统管理
-│   │   └── renderSystem.ts     # 渲染系统管理
+│   │   ├── timeSystem.ts     # 时间系统管理
+│   │   ├── renderSystem.ts   # 渲染系统管理
+│   │   └── closeViewSystem.ts # 近景浏览系统管理
 │   ├── objects/
 │   │   └── celestialObjects.ts # 天体对象创建
 │   ├── effects/
-│   │   └── sunEffects.ts       # 太阳光晕效果
+│   │   └── sunEffects.ts     # 太阳光晕效果
 │   └── types/
-│       └── index.ts            # TypeScript 类型定义
-├── dist/                       # 编译输出目录
+│       └── index.ts          # TypeScript 类型定义
+├── dist/                     # 编译输出目录
 ├── scripts/
-│   └── play.js                 # 跨平台启动脚本
-├── index.html                  # 主页面（使用 ES 模块）
-├── tsconfig.json               # TypeScript 配置
-├── package.json                # 项目依赖和脚本
-├── kill-port-8000.sh           # 端口管理脚本
-├── play.sh/play.bat            # 一键启动脚本
-├── dev.sh/dev.bat              # 开发启动脚本
-└── README.md                   # 项目文档
+│   └── play.js              # 跨平台启动脚本
+├── index.html               # 主页面（使用 ES 模块）
+├── tsconfig.json            # TypeScript 配置
+├── package.json             # 项目依赖和脚本
+├── kill-port-8000.sh        # 端口管理脚本
+├── play.sh/play.bat         # 一键启动脚本
+├── dev.sh/dev.bat           # 开发启动脚本
+└── README.md               # 项目文档
 ```
 
 ### 模块职责划分
@@ -92,6 +93,7 @@ SolarSystem/
 **系统层** (`src/systems/`)：核心功能模块
 - `timeSystem.ts`: 双时间模式、暂停控制、UI管理
 - `renderSystem.ts`: Three.js场景管理、相机控制、标签系统
+- `closeViewSystem.ts`: 近景浏览、自定义相机控制、动态几何体分辨率
 
 **对象层** (`src/objects/celestialObjects.ts`)：3D对象创建与管理
 - 太阳、行星、月球创建
@@ -145,6 +147,11 @@ SolarSystem/
 **动态标签**：行星名称跟随天体并处理遮挡
 **小行星带**：1200个独立小行星，具有真实分布和运动
 **空格键控制**：在动画模式下按空格键可暂停/继续时间演进
+**近景浏览系统**：点击天体进入沉浸式近距离观察模式
+**自定义相机控制**：球坐标控制系统，解决OrbitControls在近景模式下的鼠标控制问题
+**动态几何体分辨率**：近景模式自动提升分辨率(太阳128×128, 行星64×64)，退出时恢复默认分辨率
+**Toast通知系统**：实时操作反馈和提示信息
+**智能内存管理**：动态几何体切换，自动释放高分辨率几何体内存
 **类型安全**：完整的 TypeScript 类型检查和智能提示
 
 ## 开发说明
